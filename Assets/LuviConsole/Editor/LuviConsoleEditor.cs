@@ -42,22 +42,25 @@ namespace LuviKunG.Console.Editor
 
             sb = sb ?? new StringBuilder();
             sb.Clear();
-            sb.Append("Luvi Console Version 2.4.3");
+            sb.Append("LuviConsole Version 2.4.3");
+            sb.AppendLine();
+            sb.Append("https://github.com/LuviKunG/LuviConsole");
+            sb.AppendLine();
             sb.AppendLine();
 #if UNITY_EDITOR
-            sb.Append("In editor, Press F1 for toggle LuviDebug.");
+            sb.Append("In editor, Press F1 for toggle LuviConsole.");
 #elif UNITY_EDITOR_OSX
-            sb.Append("In editor, Press Tap for toggle LuviDebug.");
+            sb.Append("In editor, Press Tap for toggle LuviConsole.");
 #endif
 #if UNITY_ANDROID
             sb.AppendLine();
-            sb.Append("In your Android device, Swipe up direction in your screen for open LuviDebug. And swipe down for close LuviDebug.");
+            sb.Append("In your Android device, Swipe up direction in your screen for open LuviConsole. And swipe down for close LuviConsole.");
 #elif UNITY_IOS
             sb.AppendLine();
-            sb.Append("In your iPhone/iPad/iPod device, Swipe up direction in your screen for open LuviDebug. And swipe down for close LuviDebug.");
+            sb.Append("In your iPhone/iPad/iPod device, Swipe up direction in your screen for open LuviConsole. And swipe down for close LuviConsole.");
 #elif UNITY_WEBGL
             sb.AppendLine();
-            sb.Append("In your WebGL builds, Press Tap for toggle LuviDebug.");
+            sb.Append("In your WebGL builds, Press Tap for toggle LuviConsole.");
 #endif
         }
 
