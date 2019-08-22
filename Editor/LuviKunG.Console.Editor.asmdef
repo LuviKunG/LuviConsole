@@ -3,9 +3,7 @@
     "references": [
         "LuviKunG.Console"
     ],
-    "optionalUnityReferences": [
-        "TestAssemblies"
-    ],
+    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
