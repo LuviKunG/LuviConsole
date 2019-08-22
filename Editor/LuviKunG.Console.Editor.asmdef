@@ -1,0 +1,16 @@
+{
+    "name": "LuviKunG.Console.Editor",
+    "references": [
+        "LuviKunG.Console"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
