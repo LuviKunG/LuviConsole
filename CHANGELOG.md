@@ -2,7 +2,7 @@
 
 ## 2.4.3
 - namespace **LuviKunG.Console** is required. (```using LuviKunG.Console;```)
-- Make ```LuviConsole``` as plugin manager nad separate with **LuviTools** git.
+- Make ```LuviConsole``` as plugin manager and separate with **LuviTools** git.
 - Remove requirement of ```StringBuilderRichTextExtension``` and using internal coloring rich text.
 
 ## 2.4.2
