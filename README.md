@@ -35,7 +35,7 @@ public class TestCommandInstance : MonoBehaviour
 {
     private void Awake()
     {
-                // Create or get instance of LuviConsole.
+        // Create or get instance of LuviConsole.
         LuviConsole console = LuviConsole.Instance;
 
         // Add a new command of '/foo' that will result debug log of 'bar!'
