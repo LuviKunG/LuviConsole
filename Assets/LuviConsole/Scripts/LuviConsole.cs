@@ -1,6 +1,5 @@
 ﻿using LuviKunG.Console.Extension;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -13,23 +12,22 @@ namespace LuviKunG.Console
         private static readonly Color LOG_COLOR_COMMAND = new Color(0.0f, 1.0f, 1.0f, 1.0f);
         private static readonly Color LOG_COLOR_WARNING = new Color(1.0f, 1.0f, 0.0f, 1.0f);
         private static readonly Color LOG_COLOR_ERROR = new Color(1.0f, 0.0f, 0.0f, 1.0f);
-        private static readonly string NAME = nameof(LuviConsole);
 
-        public class CommandData
+        public struct CommandPreset
         {
+            public string preset;
             public string name;
             public string description;
-            public LuviCommandExecution execution;
-            public bool executeImmediately;
             public string group;
+            public bool executeImmediately;
 
-            public CommandData(string name, string description, LuviCommandExecution execution, bool executeImmediately = false, string group = null)
+            public CommandPreset(string preset, string name, string description, string group, bool executeImmediately)
             {
+                this.preset = preset;
                 this.name = name;
                 this.description = description;
-                this.execution = execution;
-                this.executeImmediately = executeImmediately;
                 this.group = group;
+                this.executeImmediately = executeImmediately;
             }
         }
 
@@ -41,7 +39,7 @@ namespace LuviKunG.Console
                 if (instance == null)
                 {
                     LuviConsole prefab = Resources.Load<LuviConsole>(DEFAULT_PREFAB_RESOURCE_PATH);
-                    if (prefab == null) throw new MissingReferenceException($"Cannot find {NAME} asset/prefab in resources path {DEFAULT_PREFAB_RESOURCE_PATH}.");
+                    if (prefab == null) throw new MissingReferenceException($"Cannot find {nameof(LuviConsole)} asset/prefab in resources path {DEFAULT_PREFAB_RESOURCE_PATH}.");
                     instance = Instantiate(prefab);
                     instance.name = prefab.name;
                 }
@@ -67,7 +65,7 @@ namespace LuviKunG.Console
                 instance = this;
             else if (instance != this)
             {
-                Debug.LogError($"There are 2 or more \'{NAME}\' on the scene. The new instance will be destroy.");
+                Debug.LogError($"There are 2 or more instance of \'{nameof(LuviConsole)}\' on the scene. The latest instance will be destroy.");
                 Destroy(gameObject);
                 return;
             }
@@ -205,7 +203,8 @@ namespace LuviKunG.Console
         private Vector2 scrollCommandPosition = Vector2.zero;
         private Vector2 scrollDebugDragPosition = Vector2.zero;
         private Vector2 scrollCommandDragPosition = Vector2.zero;
-        private Dictionary<string, CommandData> commandData = new Dictionary<string, CommandData>();
+        private Dictionary<string, LuviCommandExecution> commandData = new Dictionary<string, LuviCommandExecution>();
+        private List<CommandPreset> commandPresets = new List<CommandPreset>();
         private List<string> log = new List<string>();
         private List<string> excuteLog = new List<string>();
         private StringBuilder str = new StringBuilder();
@@ -378,11 +377,11 @@ namespace LuviKunG.Console
                     string cacheGroupName = null;
                     using (var verticalScope = new GUILayout.VerticalScope())
                     {
-                        foreach (var commandElement in commandData)
+                        foreach (var commandPreset in commandPresets)
                         {
-                            if (cacheGroupName != commandElement.Value.group)
+                            if (cacheGroupName != commandPreset.group)
                             {
-                                cacheGroupName = commandElement.Value.group;
+                                cacheGroupName = commandPreset.group;
                                 if (!string.IsNullOrEmpty(cacheGroupName))
                                 {
                                     if (GUILayout.Button(cacheGroupName, guiSkin.customStyles[2]))
@@ -400,11 +399,11 @@ namespace LuviKunG.Console
                             }
                             if (!string.IsNullOrEmpty(commandDisplayingGroup) && commandDisplayingGroup == cacheGroupName)
                             {
-                                if (GUILayout.Button(commandElement.Value.name, guiSkin.customStyles[3]))
+                                if (GUILayout.Button(commandPreset.name, guiSkin.customStyles[3]))
                                 {
-                                    command = commandElement.Key;
-                                    commandHelpText = commandElement.Value.description;
-                                    if (commandElement.Value.executeImmediately)
+                                    command = commandPreset.preset;
+                                    commandHelpText = commandPreset.description;
+                                    if (commandPreset.executeImmediately)
                                         RunCommand();
                                     else
                                         GUI.FocusControl("commandfield");
@@ -412,11 +411,11 @@ namespace LuviKunG.Console
                             }
                             else if (string.IsNullOrEmpty(cacheGroupName))
                             {
-                                if (GUILayout.Button(commandElement.Value.name, guiSkin.customStyles[3]))
+                                if (GUILayout.Button(commandPreset.name, guiSkin.customStyles[3]))
                                 {
-                                    command = commandElement.Key;
-                                    commandHelpText = commandElement.Value.description;
-                                    if (commandElement.Value.executeImmediately)
+                                    command = commandPreset.preset;
+                                    commandHelpText = commandPreset.description;
+                                    if (commandPreset.executeImmediately)
                                         RunCommand();
                                     else
                                         GUI.FocusControl("commandfield");
@@ -447,13 +446,10 @@ namespace LuviKunG.Console
             }
         }
 
-        public void AddCommand(string prefix, string name, string description, LuviCommandExecution execution, bool executeImmediately = false, string group = null)
+        public void AddCommand(string prefix, LuviCommandExecution execution)
         {
             if (!commandData.ContainsKey(prefix))
-            {
-                commandData.Add(prefix, new CommandData(name, description, execution, executeImmediately, group));
-                commandData.OrderBy(member => member.Value.group);
-            }
+                commandData.Add(prefix, execution);
             else
                 Debug.LogWarning($"Luvi Console already have {prefix} command, Disposed.");
         }
@@ -461,6 +457,47 @@ namespace LuviKunG.Console
         public bool RemoveCommand(string prefix)
         {
             return commandData.Remove(prefix);
+        }
+
+        public void AddCommandPreset(string preset, string name, string description, string group = null, bool executeImmediately = false)
+        {
+            commandPresets.Add(new CommandPreset(preset, name, description, group, executeImmediately));
+            commandPresets.Sort((lhs, rhs) => string.Compare(lhs.group, rhs.group));
+        }
+
+        public bool RemoveCommandPreset(string name)
+        {
+            int index = commandPresets.FindIndex(0, (cp) => cp.name == name);
+            if (index < 0)
+                return false;
+            else
+            {
+                commandPresets.RemoveAt(index);
+                return true;
+            }
+        }
+
+        public bool RemoveCommandPresetAt(int index)
+        {
+            if (index < 0)
+                return false;
+            else if (commandPresets.Count > index)
+            {
+                commandPresets.RemoveAt(index);
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public IList<CommandPreset> GetAllCommandPresets()
+        {
+            return commandPresets;
+        }
+
+        public void ClearAllCommandPresets()
+        {
+            commandPresets.Clear();
         }
 
         private void RunCommand()
@@ -477,14 +514,13 @@ namespace LuviKunG.Console
             }
             if (!string.IsNullOrEmpty(command))
             {
-                List<string> splitCommand = SplitCommand(command);
-                if (splitCommand.Count > 0)
+                IReadOnlyList<string> arguments = SplitCommandArguments(command);
+                if (arguments.Count > 0)
                 {
-                    string prefix = splitCommand[0];
-                    splitCommand.RemoveAt(0);
+                    string prefix = arguments[0];
                     if (commandData.ContainsKey(prefix))
                     {
-                        commandData[prefix].execution(splitCommand);
+                        commandData[prefix].Invoke(arguments);
                         ExcuteLog();
                         return;
                     }
@@ -515,7 +551,7 @@ namespace LuviKunG.Console
             command = "";
         }
 
-        private List<string> SplitCommand(string str)
+        private IReadOnlyList<string> SplitCommandArguments(string str)
         {
             const char spliter = ' ';
             const char quote = '"';

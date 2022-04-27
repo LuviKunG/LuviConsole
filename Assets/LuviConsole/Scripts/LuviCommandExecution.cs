@@ -2,5 +2,5 @@
 
 namespace LuviKunG.Console
 {
-    public delegate void LuviCommandExecution(List<string> parameters);
+    public delegate void LuviCommandExecution(IReadOnlyList<string> arguments);
 }

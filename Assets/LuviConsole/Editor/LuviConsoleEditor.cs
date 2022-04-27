@@ -42,12 +42,12 @@ namespace LuviKunG.Console.Editor
 
             sb = sb ?? new StringBuilder();
             sb.Clear();
-            sb.Append("LuviConsole Version 2.4.3");
+            sb.Append("LuviConsole Version 2.5.0");
             sb.AppendLine();
             sb.Append("https://github.com/LuviKunG/LuviConsole");
             sb.AppendLine();
             sb.AppendLine();
-#if UNITY_EDITOR
+#if UNITY_EDITOR_WIN
             sb.Append("In editor, Press F1 for toggle LuviConsole.");
 #elif UNITY_EDITOR_OSX
             sb.Append("In editor, Press Tap for toggle LuviConsole.");
@@ -71,7 +71,11 @@ namespace LuviKunG.Console.Editor
             {
                 logCapacity.intValue = EditorGUILayout.IntField(contentLogCapacity, logCapacity.intValue);
                 excuteCapacity.intValue = EditorGUILayout.IntField(contentExecuteCapacity, excuteCapacity.intValue);
+#if UNITY_ANDROID || UNITY_IOS
                 swipeRatio.floatValue = EditorGUILayout.Slider(contentSwipeRatio, swipeRatio.floatValue, 0f, 1f);
+#else
+                EditorGUILayout.HelpBox("Slider for swipe ratio is disabled.", MessageType.None, true);
+#endif
                 defaultFontSize.intValue = EditorGUILayout.IntSlider(contentDefaultFontSize, defaultFontSize.intValue, 8, 64);
                 autoShowWarning.boolValue = EditorGUILayout.Toggle(contentAutoShowWarning, autoShowWarning.boolValue);
                 autoShowError.boolValue = EditorGUILayout.Toggle(contentAutoShowError, autoShowError.boolValue);

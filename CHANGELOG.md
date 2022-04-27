@@ -1,6 +1,12 @@
-# Change Log
+# Changelog
 
-## 2.5.0
+You can get the older version by package manager in here.
+
+## Released
+
+### v2.5.0 April 27th 2022 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.5.0`
 
 - Change signature of `AddCommand()` that no longer using name, description, group name and boolean of will execution for create command preset while add new command.
 - Separate the preset command information above to new function of `AddCommandPreset()` instead.
@@ -9,17 +15,21 @@
 - Fix bugs that IMGUI label skin is dark when hover or active above text with cursor.
 - Optimize code for newer Unity Editor version.
 
-## 2.4.3
+### v2.4.3 August 23th 2019
+
+`https://github.com/LuviKunG/LuviConsole.git#2.4.3`
 
 - namespace **LuviKunG.Console** is required. (```using LuviKunG.Console;```)
 - Make ```LuviConsole``` as plugin manager and separate with **LuviTools** git.
 - Remove requirement of ```StringBuilderRichTextExtension``` and using internal coloring rich text.
 
-## 2.4.2
+## Depreceted
+
+### v2.4.2
 
 - Fix changes are not save via Unity Inspector.
 
-## 2.4.1
+### v2.4.1
 
 - New **Command Group** that using for grouping your command.
 - New **Execute Command Immediately** option that will execute the command instantly when press the command button.
@@ -27,7 +37,7 @@
 - Require extension of ```StringBuilderRichTextExtension``` to display rich text in Log.
 - New **Command Log** to display your executed command in Log.
 
-## 2.4.0
+### v2.4.0
 
 - namespace **LuviKunG** is required. (```using LuviKunG;```)
 - WebGL support.
@@ -38,7 +48,7 @@
 - Add realtime update window size and orientation.
 - Add ```LuviConsoleException``` to throw error during execute the command.
 
-## 2.3.6
+### v2.3.6
 
 - Upgrade compatible with Unity version 5, 2018 and 2019.
 - Rearrange the inspectator.
