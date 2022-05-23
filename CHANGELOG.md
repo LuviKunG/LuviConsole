@@ -4,7 +4,13 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.5.0 April 27th 2022 - Latest
+### x2.5.1 May 23th 2022 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.5.1`
+
+- Change the fixed key code for toggle **LuviConsole** to able to assign key codes as combo button by user.
+
+### v2.5.0 April 27th 2022
 
 `https://github.com/LuviKunG/LuviConsole.git#2.5.0`
 

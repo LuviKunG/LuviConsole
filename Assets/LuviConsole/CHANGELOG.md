@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.5.1
+
+- Change the fixed key code for toggle **LuviConsole** to able to assign key codes as combo button by user.
+
 ## 2.5.0
 
 - Change signature of `AddCommand()` that no longer using name, description, group name and boolean of will execution for create command preset while add new command.

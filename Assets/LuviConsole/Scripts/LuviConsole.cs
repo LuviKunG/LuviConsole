@@ -58,6 +58,7 @@ namespace LuviKunG.Console
         public bool autoShowError = false;
         public bool autoShowException = false;
         public bool commandLog = false;
+        public KeyCode[] keys = new KeyCode[] { KeyCode.F1 };
 
         private void Awake()
         {
@@ -88,7 +89,7 @@ namespace LuviKunG.Console
                 UpdateScrollDrag();
         }
 
-#if UNITY_EDITOR || UNITY_EDITOR_OSX
+#if UNITY_EDITOR
         private void Reset()
         {
             if (guiSkin == null)
@@ -121,14 +122,19 @@ namespace LuviKunG.Console
 
         private void UpdateInput()
         {
-#if UNITY_EDITOR || UNITY_WEBGL
-            if (Input.GetKeyDown(KeyCode.F1))
+#if UNITY_EDITOR
+            if (keys == null || keys.Length == 0)
+                return;
+            bool isKey = true;
+            for (int i = 0; i < keys.Length - 1; ++i)
             {
-                ToggleConsole();
-                GUI.FocusControl("commandfield");
+                if (!Input.GetKey(keys[i]))
+                {
+                    isKey = false;
+                    return;
+                }
             }
-#elif UNITY_EDITOR_OSX
-            if (Input.GetKeyDown(KeyCode.Tab))
+            if (isKey && Input.GetKeyDown(keys[keys.Length - 1]))
             {
                 ToggleConsole();
                 GUI.FocusControl("commandfield");
