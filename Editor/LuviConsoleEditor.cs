@@ -7,7 +7,7 @@ namespace LuviKunG.Console.Editor
     [CustomEditor(typeof(LuviConsole))]
     public class LuviConsoleEditor : UnityEditor.Editor
     {
-        private const string LABEL_VERSION = "LuviConsole Version 2.5.1";
+        private const string LABEL_VERSION = "LuviConsole Version 2.5.2";
         private const string LABEL_LINK = "https://github.com/LuviKunG/LuviConsole";
         private const string LABEL_ASSIGN_KEY = "Please assign key to toggle LuviConsole.";
         private const string LABEL_INFO_SWIPE = "Swipe ratio is disabled in non-target build mobile device.";
