@@ -4,7 +4,13 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### x2.5.1 May 23th 2022 - Latest
+### v2.5.2 June 29th 2022 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.5.2`
+
+- Add an example.
+
+### v2.5.1 May 23th 2022
 
 `https://github.com/LuviKunG/LuviConsole.git#2.5.1`
 
