@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.5.2
+
+- Add an example.
+
 ## 2.5.1
 
 - Change the fixed key code for toggle **LuviConsole** to able to assign key codes as combo button by user.

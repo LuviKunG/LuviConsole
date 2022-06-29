@@ -1,16 +1,36 @@
 {
   "name": "com.luvikung.luviconsole",
   "displayName": "LuviConsole",
-  "description": "LuviConsole is a console IMGUI of Unity that include custom command.",
-  "version": "2.5.1",
+  "description": "LuviConsole is a IMGUI console of Unity that include the custom command feature.",
+  "version": "2.5.2",
   "unity": "2018.4",
+  "author": "Thanut Panichyotai",
+  "contributors": [
+    {
+      "name": "LuviKunG",
+      "twitter": "@LuviKunG"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LuviKunG/LuviConsole.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LuviKunG/LuviConsole/issues"
+  },
   "keywords": [
     "unity",
     "csharp",
     "luvi",
     "console"
   ],
-  "author": "Thanut Panichyotai",
+  "samples": [
+    {
+      "displayName": "Luvi Console Examples",
+      "description": "Examples and demonstrations of LuviConsole",
+      "path": "Examples~"
+    }
+  ],
   "license": "MIT",
   "dependencies": {}
 }
