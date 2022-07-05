@@ -7,7 +7,7 @@ namespace LuviKunG.Console.Editor
     [CustomEditor(typeof(LuviConsole))]
     public class LuviConsoleEditor : UnityEditor.Editor
     {
-        private const string LABEL_VERSION = "LuviConsole Version 2.5.2";
+        private const string LABEL_VERSION = "LuviConsole Version 2.6.0";
         private const string LABEL_LINK = "https://github.com/LuviKunG/LuviConsole";
         private const string LABEL_ASSIGN_KEY = "Please assign key to toggle LuviConsole.";
         private const string LABEL_INFO_SWIPE = "Swipe ratio is disabled in non-target build mobile device.";
@@ -20,7 +20,6 @@ namespace LuviKunG.Console.Editor
         private readonly GUIContent contentAutoShowError = new GUIContent("Show Log When Error", "Automatically show logs when player is get error log.");
         private readonly GUIContent contentAutoShowException = new GUIContent("Show Log When Exception", "Automatically show logs when player is get exception log.");
         private readonly GUIContent contentCommandLog = new GUIContent("Log Command", "Log the command after you executed.");
-        private readonly GUIContent contentKeys = new GUIContent("Keys", "Keyboard keys to open the console.");
 
         private LuviConsole console;
         private StringBuilder sb;

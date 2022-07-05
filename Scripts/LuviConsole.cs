@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using System;
 
 namespace LuviKunG.Console
 {
     [AddComponentMenu("LuviKunG/LuviConsole")]
     public sealed class LuviConsole : MonoBehaviour
     {
-        private const string DEFAULT_PREFAB_RESOURCE_PATH = "LuviKunG/LuviConsole";
-        private static readonly Color LOG_COLOR_COMMAND = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-        private static readonly Color LOG_COLOR_WARNING = new Color(1.0f, 1.0f, 0.0f, 1.0f);
-        private static readonly Color LOG_COLOR_ERROR = new Color(1.0f, 0.0f, 0.0f, 1.0f);
-
-        public struct CommandPreset
+        private struct CommandPreset
         {
             public string preset;
             public string name;
@@ -31,7 +27,18 @@ namespace LuviKunG.Console
             }
         }
 
+        private const string DEFAULT_PREFAB_RESOURCE_PATH = "LuviKunG/LuviConsole";
+        private const string DEFAULT_GUISKIN_RESOURCE_PATH = "LuviConsoleGUI";
+        private static readonly Color LOG_COLOR_COMMAND = new Color(0.0f, 1.0f, 1.0f, 1.0f); // Cyan
+        private static readonly Color LOG_COLOR_WARNING = new Color(1.0f, 1.0f, 0.0f, 1.0f); // Yellow
+        private static readonly Color LOG_COLOR_ERROR = new Color(1.0f, 0.0f, 0.0f, 1.0f); // Red
+
         private static LuviConsole instance;
+
+        /// <summary>
+        /// Get the instance of <see cref="LuviConsole"/>.
+        /// <see cref="LuviConsole"/> must be only one instance and being singleton.
+        /// </summary>
         public static LuviConsole Instance
         {
             get
@@ -50,14 +57,58 @@ namespace LuviKunG.Console
         [SerializeField]
         private GUISkin guiSkin;
 
+        /// <summary>
+        /// Log capacity of this console.
+        /// Must be positive number and recommend not to high (over 100+) because it will cause IMGUI laggy.
+        /// Default value is 64.
+        /// </summary>
         public int logCapacity = 64;
+
+        /// <summary>
+        /// Log capacity of execute commands in console.
+        /// Must be positive number.
+        /// Default value is 16.
+        /// </summary>
         public int excuteCapacity = 16;
+
+        /// <summary>
+        /// Swipe ratio of touch screen to toggle show/hide the console.
+        /// 1.0 means need to drag from the top to bottom of touch screen and 0.0 means just tap and drag a little bit in touch screen to toggle.
+        /// This value will available when Unity using Target Build of Android or iOS.
+        /// </summary>
         public float swipeRatio = 0.8f;
+
+        /// <summary>
+        /// Default and start font size of this console.
+        /// Must be positive number.
+        /// Default value is 16.
+        /// </summary>
         public int defaultFontSize = 16;
+
+        /// <summary>
+        /// This console will show itself when any debug warning is appearing. 
+        /// </summary>
         public bool autoShowWarning = false;
+
+        /// <summary>
+        /// This console will show itself when any debug error is appearing. 
+        /// </summary>
         public bool autoShowError = false;
+
+        /// <summary>
+        /// This console will show itself when any debug exception is appearing. 
+        /// </summary>
         public bool autoShowException = false;
+
+        /// <summary>
+        /// Show log command when executing the command in this console.
+        /// </summary>
         public bool commandLog = false;
+
+        /// <summary>
+        /// Keys to toggle show/hide of this console.
+        /// This value will available when using in Unity Editor and Unity using Target Build of WebGL.
+        /// </summary>
         public KeyCode[] keys = new KeyCode[] { KeyCode.F1 };
 
         private void Awake()
@@ -89,17 +140,7 @@ namespace LuviKunG.Console
                 UpdateScrollDrag();
         }
 
-#if UNITY_EDITOR
-        private void Reset()
-        {
-            if (guiSkin == null)
-                guiSkin = Resources.Load<GUISkin>("LuviConsoleGUI");
-            if (guiSkin != null)
-                guiSkin.label.fontSize = defaultFontSize;
-        }
-#endif
-
-        void OnGUI()
+        private void OnGUI()
         {
             GUI.skin = guiSkin;
             if (isShowing)
@@ -110,12 +151,16 @@ namespace LuviKunG.Console
             }
         }
 
+#if UNITY_EDITOR
+        private void Reset()
+        {
+            LoadGUISkin();
+        }
+#endif
+
         private void Initialize()
         {
-            if (guiSkin == null)
-                guiSkin = Resources.Load<GUISkin>("LuviConsoleGUI");
-            if (guiSkin != null)
-                guiSkin.label.fontSize = defaultFontSize;
+            LoadGUISkin();
             DontDestroyOnLoad(gameObject);
             UpdateWindow();
         }
@@ -171,6 +216,14 @@ namespace LuviKunG.Console
 #endif
         }
 
+        private void LoadGUISkin()
+        {
+            if (guiSkin == null)
+                guiSkin = Resources.Load<GUISkin>(DEFAULT_GUISKIN_RESOURCE_PATH);
+            if (guiSkin != null)
+                guiSkin.label.fontSize = defaultFontSize;
+        }
+
         private void UpdateScrollDrag()
         {
             Vector2 currentPosition = Input.mousePosition;
@@ -212,7 +265,7 @@ namespace LuviKunG.Console
         private Dictionary<string, LuviCommandExecution> commandData = new Dictionary<string, LuviCommandExecution>();
         private List<CommandPreset> commandPresets = new List<CommandPreset>();
         private List<string> log = new List<string>();
-        private List<string> excuteLog = new List<string>();
+        private List<string> logExecuteCommands = new List<string>();
         private StringBuilder str = new StringBuilder();
 
         private bool isShowing;
@@ -220,7 +273,7 @@ namespace LuviKunG.Console
         private string commandHelpText = "";
         private string command = "";
         private string commandDisplayingGroup = null;
-        private int executeLogPos;
+        private int logExecutePosition;
         private int indexConsole;
         private int indexDebug;
 #if !(UNITY_EDITOR || UNITY_EDITOR_OSX || UNITY_WEBGL) && (UNITY_ANDROID || UNITY_IOS)
@@ -231,12 +284,74 @@ namespace LuviKunG.Console
         private void ToggleConsole() { isShowing = !isShowing; }
         private void ScrollLogToBottom() { instance.scrollDebugPosition = instance.scrollLockPosition; }
 
-        public static void Log(string str)
+        /// <summary>
+        /// Log the message into console.
+        /// </summary>
+        /// <param name="message">Message to log.</param>
+        public void Log(string message)
         {
-            if (string.IsNullOrEmpty(str))
+            if (string.IsNullOrEmpty(message))
                 return;
-            instance.log.Add(str);
-            instance.ScrollLogToBottom();
+            log.Add(message);
+            ScrollLogToBottom();
+        }
+
+        /// <summary>
+        /// Log the message into console.
+        /// </summary>
+        /// <param name="message">Message to log.</param>
+        /// <param name="color">Color of this message.</param>
+        public void Log(string message, Color color)
+        {
+            if (string.IsNullOrEmpty(message))
+                return;
+            str.Clear();
+            str.Append(message);
+            str.Color(color);
+            log.Add(str.ToString());
+            ScrollLogToBottom();
+        }
+
+        /// <summary>
+        /// Log the message into console.
+        /// </summary>
+        /// <param name="message">Message to log.</param>
+        /// <param name="bold">Bold this message.</param>
+        /// <param name="italic">Italic this message.</param>
+        public void Log(string message, bool bold, bool italic)
+        {
+            if (string.IsNullOrEmpty(message))
+                return;
+            str.Clear();
+            str.Append(message);
+            if (bold)
+                str.Bold();
+            if (italic)
+                str.Italic();
+            log.Add(str.ToString());
+            ScrollLogToBottom();
+        }
+
+        /// <summary>
+        /// Log the message into console.
+        /// </summary>
+        /// <param name="message">Message to log.</param>
+        /// <param name="color">Color of this message.</param>
+        /// <param name="bold">Bold this message.</param>
+        /// <param name="italic">Italic this message.</param>
+        public void Log(string message, Color color, bool bold, bool italic)
+        {
+            if (string.IsNullOrEmpty(message))
+                return;
+            str.Clear();
+            str.Append(message);
+            str.Color(color);
+            if (bold)
+                str.Bold();
+            if (italic)
+                str.Italic();
+            log.Add(str.ToString());
+            ScrollLogToBottom();
         }
 
         private void LogReceiveCallback(string message, string stackTrace, LogType type)
@@ -290,7 +405,10 @@ namespace LuviKunG.Console
             ScrollLogToBottom();
         }
 
-        void Clear()
+        /// <summary>
+        /// Clear all logs.
+        /// </summary>
+        public void ClearLogs()
         {
             log.Clear();
         }
@@ -329,7 +447,6 @@ namespace LuviKunG.Console
             }
         }
 
-
         private void ShowDebugWindow()
         {
             GUI.Box(rectDebugLogBackground, GUIContent.none, guiSkin.customStyles[0]);
@@ -350,7 +467,7 @@ namespace LuviKunG.Console
             }
             if (GUI.Button(rectDebugButtonClear, "Clear", guiSkin.button))
             {
-                Clear();
+                ClearLogs();
             }
             if (GUI.Button(rectDebugButtonFontInc, "A+", guiSkin.button))
             {
@@ -408,7 +525,7 @@ namespace LuviKunG.Console
                                 if (GUILayout.Button(commandPreset.name, guiSkin.customStyles[3]))
                                 {
                                     command = commandPreset.preset;
-                                    commandHelpText = commandPreset.description;
+                                    commandHelpText = commandPreset.description ?? string.Empty;
                                     if (commandPreset.executeImmediately)
                                         RunCommand();
                                     else
@@ -420,7 +537,7 @@ namespace LuviKunG.Console
                                 if (GUILayout.Button(commandPreset.name, guiSkin.customStyles[3]))
                                 {
                                     command = commandPreset.preset;
-                                    commandHelpText = commandPreset.description;
+                                    commandHelpText = commandPreset.description ?? string.Empty;
                                     if (commandPreset.executeImmediately)
                                         RunCommand();
                                     else
@@ -438,10 +555,10 @@ namespace LuviKunG.Console
                     switch (Event.current.keyCode)
                     {
                         case KeyCode.UpArrow:
-                            GetPrevExcuteLog();
+                            GetPreviousExecuteLog();
                             break;
                         case KeyCode.DownArrow:
-                            GetNextExcuteLog();
+                            GetNextExecuteLog();
                             break;
                         case KeyCode.Return:
                         case KeyCode.KeypadEnter:
@@ -452,25 +569,54 @@ namespace LuviKunG.Console
             }
         }
 
+        /// <summary>
+        /// Add new command for this console.
+        /// </summary>
+        /// <param name="prefix">Prefix of the command.</param>
+        /// <param name="execution">Execution callback function.</param>
         public void AddCommand(string prefix, LuviCommandExecution execution)
         {
             if (!commandData.ContainsKey(prefix))
                 commandData.Add(prefix, execution);
             else
-                Debug.LogWarning($"Luvi Console already have {prefix} command, Disposed.");
+                throw new InvalidOperationException($"Already have {prefix} command.");
         }
 
+        /// <summary>
+        /// Remove command by prefix.
+        /// </summary>
+        /// <param name="prefix">Prefix of the command.</param>
+        /// <returns>Is command removed?</returns>
         public bool RemoveCommand(string prefix)
         {
             return commandData.Remove(prefix);
         }
 
-        public void AddCommandPreset(string preset, string name, string description, string group = null, bool executeImmediately = false)
+        /// <summary>
+        /// Add new command preset.
+        /// This command preset will represent as button for easy to access via command list in console.
+        /// If group was assigned, the button will be display in the group.
+        /// </summary>
+        /// <param name="preset">Preset of the command.</param>
+        /// <param name="name">Name of the command.</param>
+        /// <param name="description">(Optional) Command description that will display in command list in console.</param>
+        /// <param name="group">(Optional) Group of this command. This field can be null for unassign the group.</param>
+        /// <param name="executeImmediately">(Optional) Is execute immediately when the button is press?</param>
+        public void AddCommandPreset(string preset, string name, string description = null, string group = null, bool executeImmediately = false)
         {
-            commandPresets.Add(new CommandPreset(preset, name, description, group, executeImmediately));
+            if (string.IsNullOrWhiteSpace(preset))
+                throw new ArgumentException($"{nameof(preset)} shouldn't be null, empty or whitespace.");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException($"{nameof(name)} shouldn't be null, empty or whitespace.");
+            commandPresets.Add(new CommandPreset(preset, name.Trim(), string.IsNullOrWhiteSpace(description) ? null : description.Trim(), string.IsNullOrWhiteSpace(group) ? null : group.Trim(), executeImmediately));
             commandPresets.Sort((lhs, rhs) => string.Compare(lhs.group, rhs.group));
         }
 
+        /// <summary>
+        /// Remove command preset by name.
+        /// </summary>
+        /// <param name="name">Name of the command preset.</param>
+        /// <returns>Is command preset removed?</returns>
         public bool RemoveCommandPreset(string name)
         {
             int index = commandPresets.FindIndex(0, (cp) => cp.name == name);
@@ -483,11 +629,16 @@ namespace LuviKunG.Console
             }
         }
 
+        /// <summary>
+        /// Remove command preset at index.
+        /// </summary>
+        /// <param name="index">Index of command preset.</param>
+        /// <returns>Is command preset removed?</returns>
         public bool RemoveCommandPresetAt(int index)
         {
             if (index < 0)
                 return false;
-            else if (commandPresets.Count > index)
+            else if (index < commandPresets.Count)
             {
                 commandPresets.RemoveAt(index);
                 return true;
@@ -496,11 +647,41 @@ namespace LuviKunG.Console
                 return false;
         }
 
-        public IList<CommandPreset> GetAllCommandPresets()
+        /// <summary>
+        /// Get available command presets.
+        /// </summary>
+        /// <returns>Readonly list of presets.</returns>
+        public IReadOnlyList<string> GetAllCommandPresets()
         {
-            return commandPresets;
+            List<string> list = new List<string>();
+            for (int i = 0; i < commandPresets.Count; ++i)
+                list.Add(commandPresets[i].preset);
+            return list;
         }
 
+        /// <summary>
+        /// Get all name of available command presets.
+        /// </summary>
+        /// <returns>Readonly list of names.</returns>
+        public IReadOnlyList<string> GetAllCommandPresetsName()
+        {
+            List<string> list = new List<string>();
+            for (int i = 0; i < commandPresets.Count; ++i)
+                list.Add(commandPresets[i].name);
+            return list;
+        }
+
+        /// <summary>
+        /// Remove all commands in this console.
+        /// </summary>
+        public void ClearAllCommands()
+        {
+            commandData.Clear();
+        }
+
+        /// <summary>
+        /// Remove all command presets in this console.
+        /// </summary>
         public void ClearAllCommandPresets()
         {
             commandPresets.Clear();
@@ -527,7 +708,7 @@ namespace LuviKunG.Console
                     if (commandData.ContainsKey(prefix))
                     {
                         commandData[prefix].Invoke(arguments);
-                        ExcuteLog();
+                        LogCurrentExecuteCommands();
                         return;
                     }
                     else
@@ -536,7 +717,7 @@ namespace LuviKunG.Console
                         str.Append("No command were found.");
                         str.Color(LOG_COLOR_COMMAND);
                         Log(str.ToString());
-                        ExcuteLog();
+                        LogCurrentExecuteCommands();
                         return;
                     }
                 }
@@ -548,12 +729,12 @@ namespace LuviKunG.Console
             }
         }
 
-        private void ExcuteLog()
+        private void LogCurrentExecuteCommands()
         {
-            excuteLog.Add(command);
-            while (excuteLog.Count > excuteCapacity)
-                excuteLog.RemoveAt(0);
-            executeLogPos = excuteLog.Count;
+            logExecuteCommands.Add(command);
+            while (logExecuteCommands.Count > excuteCapacity)
+                logExecuteCommands.RemoveAt(0);
+            logExecutePosition = logExecuteCommands.Count;
             command = "";
         }
 
@@ -598,28 +779,28 @@ namespace LuviKunG.Console
             return list;
         }
 
-        private void GetNextExcuteLog()
+        private void GetNextExecuteLog()
         {
-            if (excuteLog.Count == 0)
+            if (logExecuteCommands.Count == 0)
                 return;
-            executeLogPos++;
-            if (executeLogPos >= excuteLog.Count)
+            logExecutePosition++;
+            if (logExecutePosition >= logExecuteCommands.Count)
             {
-                executeLogPos = excuteLog.Count - 1;
+                logExecutePosition = logExecuteCommands.Count - 1;
                 command = "";
                 return;
             }
-            command = excuteLog[executeLogPos];
+            command = logExecuteCommands[logExecutePosition];
         }
 
-        private void GetPrevExcuteLog()
+        private void GetPreviousExecuteLog()
         {
-            if (excuteLog.Count == 0)
+            if (logExecuteCommands.Count == 0)
                 return;
-            executeLogPos--;
-            if (executeLogPos < 0)
-                executeLogPos = 0;
-            command = excuteLog[executeLogPos];
+            logExecutePosition--;
+            if (logExecutePosition < 0)
+                logExecutePosition = 0;
+            command = logExecuteCommands[logExecutePosition];
         }
     }
 }

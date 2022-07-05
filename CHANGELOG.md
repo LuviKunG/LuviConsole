@@ -1,5 +1,20 @@
 # Change Log
 
+## 2.6.0
+
+- Change the static function of `Log()` to normal function.
+  - Because calling the old static function is equal to calling the class instance function.
+  - So calling function from instance is a better way. For example:
+  ```csharp
+  LuviConsole console = LuviConsole.Instance;
+  console.Log("This is log");
+  ```
+- Add various overload function of `Log()` for adding message with color, bold and italic.
+- Add various XML tags C# documentation comments for all public functions and fields.
+- Remove `LuviConsoleException` class because it doesn't use anymore and  using .NET `System` exception instead.
+- Remove many unnecessary functions, property and fields.
+- Optimize the code.
+
 ## 2.5.2
 
 - Add an example.
