@@ -53,6 +53,16 @@ public class TestCommandInstance : MonoBehaviour
 
         // Add a new command preset of '/foo' that will be show as button below of command input in the group of 'Testing'.
         console.AddCommandPreset("/foo", "Foo", "Just test command of foo", "Testing", false);
+
+        // This is custom log for putting message in console directly without receive debug log.
+        console.Log("This is custom log");
+        console.Log("This is custom log with color", Color.blue);
+        console.Log("This is custom log with bold", true, false);
+        console.Log("This is custom log with italic", false, true);
+        console.Log("This is custom log with both of bold and italic", true, true);
+        console.Log("This is custom log with color and bold", Color.blue, true, false);
+        console.Log("This is custom log with color and italic", Color.blue, false, true);
+        console.Log("This is custom log with color and both of bold and italic", Color.blue, true, true);
     }
 }
 ```
@@ -74,7 +84,7 @@ Then merge this json format below.
 ```json
 {
   "dependencies": {
-    "com.luvikung.luviconsole": "https://github.com/LuviKunG/LuviConsole.git#2.5.2"
+    "com.luvikung.luviconsole": "https://github.com/LuviKunG/LuviConsole.git#2.6.0"
   }
 }
 ```
@@ -89,7 +99,7 @@ In Unity 2019.3 or greater, Package Manager is include the new feature that able
 
 Just simply using this git URL and following with version like this example.
 
-**https://github.com/LuviKunG/LuviConsole.git#2.5.2**
+**https://github.com/LuviKunG/LuviConsole.git#2.6.0**
 
 Make sure that you're select the latest version.
 

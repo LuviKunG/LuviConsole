@@ -24,6 +24,16 @@ public class TestCommandInstance : MonoBehaviour
 
         // Add a new command preset of '/foo' that will be show as button below of command input in the group of 'Testing'.
         console.AddCommandPreset("/foo", "Foo", "Just test command of foo", "Testing", false);
+
+        // This is custom log for putting message in console directly without receive debug log.
+        console.Log("This is custom log");
+        console.Log("This is custom log with color", Color.blue);
+        console.Log("This is custom log with bold", true, false);
+        console.Log("This is custom log with italic", false, true);
+        console.Log("This is custom log with both of bold and italic", true, true);
+        console.Log("This is custom log with color and bold", Color.blue, true, false);
+        console.Log("This is custom log with color and italic", Color.blue, false, true);
+        console.Log("This is custom log with color and both of bold and italic", Color.blue, true, true);
     }
 
     private void Start()

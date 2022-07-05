@@ -4,7 +4,24 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.5.2 June 29th 2022 - Latest
+### v2.6.0 July 5th 2022 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.6.0`
+
+- Change the static function of `Log()` to normal function.
+  - Because calling the old static function is equal to calling the class instance function.
+  - So calling function from instance is a better way. For example:
+  ```csharp
+  LuviConsole console = LuviConsole.Instance;
+  console.Log("This is log");
+  ```
+- Add various overload function of `Log()` for adding message with color, bold and italic.
+- Add various XML tags C# documentation comments for all public functions and fields.
+- Remove `LuviConsoleException` class because it doesn't use anymore and  using .NET `System` exception instead.
+- Remove many unnecessary functions, property and fields.
+- Optimize the code.
+
+### v2.5.2 June 29th 2022
 
 `https://github.com/LuviKunG/LuviConsole.git#2.5.2`
 
