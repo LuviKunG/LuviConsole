@@ -1,12 +1,13 @@
 ﻿using LuviKunG.Console.Extension;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using System;
 
 namespace LuviKunG.Console
 {
     [AddComponentMenu("LuviKunG/LuviConsole")]
+    [HelpURL("https://github.com/LuviKunG/LuviConsole")]
     public sealed class LuviConsole : MonoBehaviour
     {
         private struct CommandPreset
@@ -71,12 +72,14 @@ namespace LuviKunG.Console
         /// </summary>
         public int excuteCapacity = 16;
 
+#if UNITY_ANDROID || UNITY_IOS
         /// <summary>
         /// Swipe ratio of touch screen to toggle show/hide the console.
         /// 1.0 means need to drag from the top to bottom of touch screen and 0.0 means just tap and drag a little bit in touch screen to toggle.
         /// This value will available when Unity using Target Build of Android or iOS.
         /// </summary>
         public float swipeRatio = 0.8f;
+#endif
 
         /// <summary>
         /// Default and start font size of this console.
@@ -128,6 +131,7 @@ namespace LuviKunG.Console
         {
             Application.logMessageReceivedThreaded += LogReceiveCallback;
         }
+
         private void OnDisable()
         {
             Application.logMessageReceivedThreaded -= LogReceiveCallback;
@@ -270,8 +274,8 @@ namespace LuviKunG.Console
 
         private bool isShowing;
         private bool isScrollDebugDragging = false;
-        private string commandHelpText = "";
-        private string command = "";
+        private string commandHelpText = string.Empty;
+        private string command = string.Empty;
         private string commandDisplayingGroup = null;
         private int logExecutePosition;
         private int indexConsole;
@@ -487,7 +491,7 @@ namespace LuviKunG.Console
             GUI.enabled = commandData.Count > 0;
             command = GUI.TextField(rectCommandInput, command, guiSkin.textField);
             if (GUI.Button(rectCommandReturn, "Send", guiSkin.button))
-                RunCommand();
+                ExecuteCurrentCommand();
             GUI.enabled = true;
             GUI.Box(rectCommandBackground, GUIContent.none, guiSkin.customStyles[1]);
             GUI.Label(rectCommandHelpBox, commandHelpText);
@@ -524,24 +528,28 @@ namespace LuviKunG.Console
                             {
                                 if (GUILayout.Button(commandPreset.name, guiSkin.customStyles[3]))
                                 {
-                                    command = commandPreset.preset;
                                     commandHelpText = commandPreset.description ?? string.Empty;
                                     if (commandPreset.executeImmediately)
-                                        RunCommand();
+                                        _ = ExecuteCommand(commandPreset.preset);
                                     else
+                                    {
+                                        command = commandPreset.preset;
                                         GUI.FocusControl("commandfield");
+                                    }
                                 }
                             }
                             else if (string.IsNullOrEmpty(cacheGroupName))
                             {
                                 if (GUILayout.Button(commandPreset.name, guiSkin.customStyles[3]))
                                 {
-                                    command = commandPreset.preset;
                                     commandHelpText = commandPreset.description ?? string.Empty;
                                     if (commandPreset.executeImmediately)
-                                        RunCommand();
+                                        _ = ExecuteCommand(commandPreset.preset);
                                     else
+                                    {
+                                        command = commandPreset.preset;
                                         GUI.FocusControl("commandfield");
+                                    }
                                 }
                             }
                         }
@@ -562,7 +570,7 @@ namespace LuviKunG.Console
                             break;
                         case KeyCode.Return:
                         case KeyCode.KeypadEnter:
-                            RunCommand();
+                            ExecuteCurrentCommand();
                             break;
                     }
                 }
@@ -687,7 +695,12 @@ namespace LuviKunG.Console
             commandPresets.Clear();
         }
 
-        private void RunCommand()
+        /// <summary>
+        /// Execute command in this console.
+        /// </summary>
+        /// <param name="command">Command as string</param>
+        /// <returns>Is execute success?</returns>
+        public bool ExecuteCommand(string command)
         {
             command = command.Trim();
             if (commandLog)
@@ -708,34 +721,38 @@ namespace LuviKunG.Console
                     if (commandData.ContainsKey(prefix))
                     {
                         commandData[prefix].Invoke(arguments);
-                        LogCurrentExecuteCommands();
-                        return;
+                        LogExecuteCommands(command);
+                        return true;
                     }
                     else
                     {
                         str.Clear();
-                        str.Append("No command were found.");
+                        str.Append($"No command \'{prefix}\' were found.");
                         str.Color(LOG_COLOR_COMMAND);
                         Log(str.ToString());
-                        LogCurrentExecuteCommands();
-                        return;
+                        LogExecuteCommands(command);
+                        return false;
                     }
                 }
                 else
-                {
-                    command = "";
-                    return;
-                }
+                    return false;
             }
+            else
+                return false;
         }
 
-        private void LogCurrentExecuteCommands()
+        private void ExecuteCurrentCommand()
+        {
+            _ = ExecuteCommand(command);
+            command = string.Empty;
+        }
+
+        private void LogExecuteCommands(string command)
         {
             logExecuteCommands.Add(command);
             while (logExecuteCommands.Count > excuteCapacity)
                 logExecuteCommands.RemoveAt(0);
             logExecutePosition = logExecuteCommands.Count;
-            command = "";
         }
 
         private IReadOnlyList<string> SplitCommandArguments(string str)
@@ -787,7 +804,7 @@ namespace LuviKunG.Console
             if (logExecutePosition >= logExecuteCommands.Count)
             {
                 logExecutePosition = logExecuteCommands.Count - 1;
-                command = "";
+                command = string.Empty;
                 return;
             }
             command = logExecuteCommands[logExecutePosition];

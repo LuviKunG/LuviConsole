@@ -25,6 +25,9 @@ public class TestCommandInstance : MonoBehaviour
         // Add a new command preset of '/foo' that will be show as button below of command input in the group of 'Testing'.
         console.AddCommandPreset("/foo", "Foo", "Just test command of foo", "Testing", false);
 
+        // Add a new command preset of '/test' that will be show as button below of command input in the group of 'Testing' and will execute immediately when pressed.
+        console.AddCommandPreset("/test \"Hello World!\"", "Test", "Just test command of test", "Testing", true);
+
         // This is custom log for putting message in console directly without receive debug log.
         console.Log("This is custom log");
         console.Log("This is custom log with color", Color.blue);
@@ -42,5 +45,9 @@ public class TestCommandInstance : MonoBehaviour
         Debug.LogWarning("This is 'Debug.LogWarning()'");
         Debug.LogError("This is 'Debug.LogError()'");
         Debug.LogException(new System.Exception("This is 'Debug.LogException()'"));
+
+        LuviConsole console = LuviConsole.Instance;
+        console.ExecuteCommand("/foo");
+        console.ExecuteCommand("/test Arg1 Arg2 Arg3 Arg4 Arg5");
     }
 }

@@ -168,13 +168,12 @@ MonoBehaviour:
   guiSkin: {fileID: 11400000, guid: 86ab23dcee2204e42b413c0cececf64f, type: 2}
   logCapacity: 64
   excuteCapacity: 16
-  swipeRatio: 0.8
   defaultFontSize: 16
   autoShowWarning: 0
   autoShowError: 0
   autoShowException: 0
-  commandLog: 0
-  keys: 1a010000
+  commandLog: 1
+  keys: 320100001a010000
 --- !u!4 &1058137233
 Transform:
   m_ObjectHideFlags: 0

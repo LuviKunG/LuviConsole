@@ -4,7 +4,18 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.6.0 July 5th 2022 - Latest
+### v2.7.0 September 9th 2022 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.7.0`
+
+- Add new public function of ```ExecuteCommand(string commandString)``` for execute the command directly in run-time.
+- Improve the editor inspector.
+  - Add help URL to the git repository.
+  - Able to validate keys to toggle the console.
+  - Separate the value of swipe ratio depend of project's target build.
+- Optimize the code.
+
+### v2.6.0 July 5th 2022
 
 `https://github.com/LuviKunG/LuviConsole.git#2.6.0`
 
@@ -17,7 +28,7 @@ You can get the older version by package manager in here.
   ```
 - Add various overload function of `Log()` for adding message with color, bold and italic.
 - Add various XML tags C# documentation comments for all public functions and fields.
-- Remove `LuviConsoleException` class because it doesn't use anymore and  using .NET `System` exception instead.
+- Remove `LuviConsoleException` class because it doesn't use anymore and will using .NET `System` exception instead.
 - Remove many unnecessary functions, property and fields.
 - Optimize the code.
 
