@@ -1,5 +1,14 @@
 # Change Log
 
+## 2.7.0
+
+- Add new public function of ```ExecuteCommand(string commandString)``` for execute the command directly in run-time.
+- Improve the editor inspector.
+  - Add help URL to the git repository.
+  - Able to validate keys to toggle the console.
+  - Separate the value of swipe ratio depend of project's target build.
+- Optimize the code.
+
 ## 2.6.0
 
 - Change the static function of `Log()` to normal function.

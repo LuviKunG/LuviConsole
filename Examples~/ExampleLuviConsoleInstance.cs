@@ -28,7 +28,9 @@ namespace LuviKunG.Examples
 
             // Add a new command preset of '/foo' that will be show as button below of command input in the group of 'Testing'.
             console.AddCommandPreset("/foo", "Foo", "Just test command of foo", "Testing", false);
-            console.AddCommandPreset("/test", "Test", "Just test command of test", "Testing", true);
+
+            // Add a new command preset of '/test' that will be show as button below of command input in the group of 'Testing' and will execute immediately when pressed.
+            console.AddCommandPreset("/test \"Hello World!\"", "Test", "Just test command of test", "Testing", true);
 
             // This is custom log for putting message in console directly without receive debug log.
             console.Log("This is custom log");
@@ -45,6 +47,10 @@ namespace LuviKunG.Examples
         private void Reset()
         {
             gameObject.name = nameof(LuviConsole);
+
+            LuviConsole console = LuviConsole.Instance;
+            console.ExecuteCommand("/foo");
+            console.ExecuteCommand("/test Arg1 Arg2 Arg3 Arg4 Arg5");
         }
 #endif
     }
