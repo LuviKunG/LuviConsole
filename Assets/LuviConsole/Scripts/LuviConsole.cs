@@ -755,45 +755,35 @@ namespace LuviKunG.Console
             logExecutePosition = logExecuteCommands.Count;
         }
 
-        private IReadOnlyList<string> SplitCommandArguments(string str)
+        private IReadOnlyList<string> SplitCommandArguments(string command)
         {
-            const char spliter = ' ';
-            const char quote = '"';
-            bool isQuote = false;
-            List<string> list = new List<string>();
-            StringBuilder sb = new StringBuilder();
-            sb.Clear();
-            for (int i = 0; i < str.Length; i++)
+            List<string> arguments = new List<string>();
+            int start = 0;
+            bool inQuotation = false;
+            for (int i = 0; i < command.Length; ++i)
             {
-                if (isQuote)
+                if (command[i] == ' ' && !inQuotation)
                 {
-                    if (str[i] == quote)
-                    {
-                        isQuote = false;
-                        continue;
-                    }
+                    arguments.Add(command.Substring(start, i - start));
+                    start = i + 1;
                 }
-                else
+                else if (command[i] == '"' && ((i == 0 || command[i - 1] == ' ') || (i == command.Length - 1 || command[i + 1] == ' ')))
                 {
-                    if (str[i] == spliter)
+                    if (inQuotation)
                     {
-                        if (sb.Length > 0)
-                            list.Add(sb.ToString());
-                        sb.Clear();
-                        continue;
+                        arguments.Add(command.Substring(start, i - start));
+                        start = ++i;
                     }
-                    if (str[i] == quote)
+                    else
                     {
-                        isQuote = true;
-                        continue;
+                        start = ++i;
                     }
+                    inQuotation = !inQuotation;
                 }
-                sb.Append(str[i]);
             }
-            if (sb.Length > 0)
-                list.Add(sb.ToString());
-            sb.Clear();
-            return list;
+            if (start < command.Length)
+                arguments.Add(command.Substring(start));
+            return arguments;
         }
 
         private void GetNextExecuteLog()

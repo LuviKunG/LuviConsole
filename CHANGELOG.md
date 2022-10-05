@@ -4,7 +4,13 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.7.0 September 9th 2022 - Latest
+### v2.7.1 October 5th 2022 - Latest
+
+- Fix the split command function that cannot split JSON string.
+  - Using JSON string shouldn't have any space in it.
+  - For example: /parse data {\"name\":\"LuviKunG\",\"age\":20}
+
+### v2.7.0 September 9th 2022
 
 `https://github.com/LuviKunG/LuviConsole.git#2.7.0`
 

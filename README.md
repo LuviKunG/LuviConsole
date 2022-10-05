@@ -91,7 +91,7 @@ Then merge this json format below.
 ```json
 {
   "dependencies": {
-    "com.luvikung.luviconsole": "https://github.com/LuviKunG/LuviConsole.git#2.7.0"
+    "com.luvikung.luviconsole": "https://github.com/LuviKunG/LuviConsole.git#2.7.1"
   }
 }
 ```
@@ -106,7 +106,7 @@ In Unity 2019.3 or greater, Package Manager is include the new feature that able
 
 Just simply using this git URL and following with version like this example.
 
-**https://github.com/LuviKunG/LuviConsole.git#2.7.0**
+**https://github.com/LuviKunG/LuviConsole.git#2.7.1**
 
 Make sure that you're select the latest version.
 
