@@ -759,30 +759,58 @@ namespace LuviKunG.Console
         {
             List<string> arguments = new List<string>();
             int start = 0;
-            bool inQuotation = false;
-            for (int i = 0; i < command.Length; ++i)
+            bool inQuote = false;
+            bool inJSON = false;
+            bool lastIsSpace = false;
+            for (int i = 0; i < command.Length; i++)
             {
-                if (command[i] == ' ' && !inQuotation)
+                if (command[i] == '{' && !inJSON && (i == 0 || lastIsSpace))
                 {
-                    arguments.Add(command.Substring(start, i - start));
+                    inJSON = true;
+                    start = i;
+                }
+                else if (command[i] == '}' && inJSON)
+                {
+                    inJSON = false;
+                    if (start != i)
+                    {
+                        arguments.Add(command.Substring(start, i + 1 - start));
+                    }
                     start = i + 1;
                 }
-                else if (command[i] == '"' && ((i == 0 || command[i - 1] == ' ') || (i == command.Length - 1 || command[i + 1] == ' ')))
+                else if (command[i] == '"' && !inJSON)
                 {
-                    if (inQuotation)
+                    inQuote = !inQuote;
+                    if (inQuote)
                     {
-                        arguments.Add(command.Substring(start, i - start));
-                        start = ++i;
+                        start = i + 1;
                     }
                     else
                     {
-                        start = ++i;
+                        if (start != i)
+                        {
+                            arguments.Add(command.Substring(start, i - start));
+                        }
+                        start = i + 1;
                     }
-                    inQuotation = !inQuotation;
+                }
+                else if (command[i] == ' ' && !inQuote && !inJSON)
+                {
+                    if (start != i)
+                    {
+                        arguments.Add(command.Substring(start, i - start));
+                    }
+                    start = i + 1;
+                    lastIsSpace = true;
+                }
+                else
+                {
+                    lastIsSpace = false;
                 }
             }
-            if (start < command.Length)
-                arguments.Add(command.Substring(start));
+            var lastString = command.Substring(start);
+            if (!string.IsNullOrEmpty(lastString))
+                arguments.Add(lastString);
             return arguments;
         }
 
