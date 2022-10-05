@@ -1,5 +1,10 @@
 # Change Log
 
+## 2.7.1
+
+- Fix the split command function that cannot split JSON string.
+  - Using JSON string shouldn't have any space in it.
+
 ## 2.7.0
 
 - Add new public function of ```ExecuteCommand(string commandString)``` for execute the command directly in run-time.
