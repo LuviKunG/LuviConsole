@@ -285,9 +285,6 @@ namespace LuviKunG.Console
         private Vector3 _swipePosMoving = Vector3.zero;
 #endif
 
-        private void ToggleConsole() { isShowing = !isShowing; }
-        private void ScrollLogToBottom() { instance.scrollDebugPosition = instance.scrollLockPosition; }
-
         /// <summary>
         /// Log the message into console.
         /// </summary>
@@ -297,6 +294,7 @@ namespace LuviKunG.Console
             if (string.IsNullOrEmpty(message))
                 return;
             log.Add(message);
+            UpdateLogCapacity();
             ScrollLogToBottom();
         }
 
@@ -313,6 +311,7 @@ namespace LuviKunG.Console
             str.Append(message);
             str.Color(color);
             log.Add(str.ToString());
+            UpdateLogCapacity();
             ScrollLogToBottom();
         }
 
@@ -333,6 +332,7 @@ namespace LuviKunG.Console
             if (italic)
                 str.Italic();
             log.Add(str.ToString());
+            UpdateLogCapacity();
             ScrollLogToBottom();
         }
 
@@ -355,6 +355,7 @@ namespace LuviKunG.Console
             if (italic)
                 str.Italic();
             log.Add(str.ToString());
+            UpdateLogCapacity();
             ScrollLogToBottom();
         }
 
@@ -404,9 +405,6 @@ namespace LuviKunG.Console
                     Log(message);
                     break;
             }
-            while (log.Count > logCapacity)
-                log.RemoveAt(0);
-            ScrollLogToBottom();
         }
 
         /// <summary>
@@ -415,6 +413,22 @@ namespace LuviKunG.Console
         public void ClearLogs()
         {
             log.Clear();
+        }
+
+        private void ToggleConsole()
+        {
+            isShowing = !isShowing;
+        }
+
+        private void ScrollLogToBottom()
+        {
+            instance.scrollDebugPosition = instance.scrollLockPosition;
+        }
+
+        private void UpdateLogCapacity()
+        {
+            while (log.Count > logCapacity)
+                log.RemoveAt(0);
         }
 
         private void UpdateWindow()
