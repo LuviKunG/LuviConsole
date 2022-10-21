@@ -22,7 +22,7 @@ public class TestCommandInstance : MonoBehaviour
             for (int i = 0; i < args.Count; ++i)
                 Debug.Log($"args[{i}] = " + args[i]);
         });
-        
+
         console.AddCommand("/parse", (args) =>
         {
             string[] dataArgs = new string[args.Count - 1];
@@ -66,6 +66,25 @@ public class TestCommandInstance : MonoBehaviour
         LuviConsole console = LuviConsole.Instance;
         console.ExecuteCommand("/foo");
         console.ExecuteCommand("/test Arg1 Arg2 Arg3 Arg4 Arg5");
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
+            LuviConsole.Instance.Log(RandomString(16));
+        if (Input.GetKeyDown(KeyCode.V))
+            Debug.Log(RandomString(16));
+    }
+
+    private string RandomString(int length)
+    {
+        if (length < 0)
+            return string.Empty;
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        System.Text.StringBuilder builder = new System.Text.StringBuilder();
+        for (int i = 0; i < length; i++)
+            builder.Append(chars[Random.Range(0, chars.Length)]);
+        return builder.ToString();
     }
 
     private object CreateVariantFromStringArray(params string[] args)

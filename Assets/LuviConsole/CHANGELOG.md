@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.7.2
+
+- Fix log panel issue that new console message will not show because  message count is over capacity.
+
 ## 2.7.1
 
 - Fix the split command function that cannot split JSON string.

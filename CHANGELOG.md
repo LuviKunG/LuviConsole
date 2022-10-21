@@ -4,7 +4,15 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.7.1 October 5th 2022 - Latest
+### v2.7.2 October 21st 2022 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.7.2`
+
+- Fix log panel issue that new console message will not show because  message count is over capacity.
+
+### v2.7.1 October 5th 2022
+
+`https://github.com/LuviKunG/LuviConsole.git#2.7.1`
 
 - Fix the split command function that cannot split JSON string.
   - Using JSON string shouldn't have any space in it.
