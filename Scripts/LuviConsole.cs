@@ -30,6 +30,7 @@ namespace LuviKunG.Console
 
         private const string DEFAULT_PREFAB_RESOURCE_PATH = "LuviKunG/LuviConsole";
         private const string DEFAULT_GUISKIN_RESOURCE_PATH = "LuviConsoleGUI";
+
         private static readonly Color LOG_COLOR_COMMAND = new Color(0.0f, 1.0f, 1.0f, 1.0f); // Cyan
         private static readonly Color LOG_COLOR_WARNING = new Color(1.0f, 1.0f, 0.0f, 1.0f); // Yellow
         private static readonly Color LOG_COLOR_ERROR = new Color(1.0f, 0.0f, 0.0f, 1.0f); // Red
@@ -47,7 +48,8 @@ namespace LuviKunG.Console
                 if (instance == null)
                 {
                     LuviConsole prefab = Resources.Load<LuviConsole>(DEFAULT_PREFAB_RESOURCE_PATH);
-                    if (prefab == null) throw new MissingReferenceException($"Cannot find {nameof(LuviConsole)} asset/prefab in resources path {DEFAULT_PREFAB_RESOURCE_PATH}.");
+                    if (prefab == null)
+                        throw new MissingReferenceException($"Cannot find {nameof(LuviConsole)} asset/prefab in resources path {DEFAULT_PREFAB_RESOURCE_PATH}.");
                     instance = Instantiate(prefab);
                     instance.name = prefab.name;
                 }
@@ -433,35 +435,41 @@ namespace LuviKunG.Console
 
         private void UpdateWindow()
         {
-            if (Screen.width > Screen.height)
+            Rect safeArea = Screen.safeArea;
+            Rect rectScreen = new Rect(safeArea.x, Screen.height - (safeArea.y + safeArea.height), safeArea.width, safeArea.height);
+            if (rectScreen.width > rectScreen.height)
             {
                 //Landscape
-                rectDebugLogBackground = new Rect(0, 0, Screen.width / 2, Screen.height - 64);
-                rectDebugLogScroll = new Rect(8, 24, (Screen.width / 2) - 16, Screen.height - 96);
-                rectDebugLogScrollDrag = new Rect(8, 24, (Screen.width / 2) - 48, Screen.height - 96);
-                rectDebugButtonClear = new Rect(0, Screen.height - 64, 128, 64);
-                rectDebugButtonFontInc = new Rect((Screen.width / 2) - 128, Screen.height - 64, 64, 64);
-                rectDebugButtonFontDesc = new Rect((Screen.width / 2) - 64, Screen.height - 64, 64, 64);
-                rectCommandBackground = new Rect(Screen.width / 2, 64, Screen.width / 2, Screen.height - 64);
-                rectCommandArea = new Rect((Screen.width / 2) + 8, 136, (Screen.width / 2) - 16, Screen.height - 144);
-                rectCommandInput = new Rect(Screen.width / 2, 0, (Screen.width / 2) - 64, 64);
-                rectCommandHelpBox = new Rect((Screen.width / 2) + 8, 72, (Screen.width / 2) - 64, 60);
-                rectCommandReturn = new Rect(Screen.width - 64, 0, 64, 64);
+                Rect rectLeft = new Rect(rectScreen.x, rectScreen.y, rectScreen.width / 2, rectScreen.height);
+                Rect rectRight = new Rect(rectScreen.x + rectScreen.width / 2, rectScreen.y, rectScreen.width / 2, rectScreen.height);
+                rectDebugLogBackground = new Rect(rectLeft.x, rectLeft.y, rectLeft.width, rectLeft.height - 64);
+                rectDebugLogScroll = new Rect(rectLeft.x + 8, rectLeft.y + 24, rectLeft.width - 16, rectLeft.height - 96);
+                rectDebugLogScrollDrag = new Rect(rectLeft.x + 8, rectLeft.y + 24, rectLeft.width - 48, rectLeft.height - 96);
+                rectDebugButtonClear = new Rect(rectLeft.x, rectLeft.y + rectLeft.height - 64, 128, 64);
+                rectDebugButtonFontInc = new Rect(rectLeft.x + rectLeft.width - 128, rectLeft.y + rectLeft.height - 64, 64, 64);
+                rectDebugButtonFontDesc = new Rect(rectLeft.x + rectLeft.width - 64, rectLeft.y + rectLeft.height - 64, 64, 64);
+                rectCommandBackground = new Rect(rectRight.x, rectRight.y + 64, rectRight.width, rectRight.height - 64);
+                rectCommandArea = new Rect(rectRight.x + 8, rectRight.y + 136, rectRight.width - 16, rectRight.height - 144);
+                rectCommandInput = new Rect(rectRight.x, 0, rectRight.width - 64, 64);
+                rectCommandHelpBox = new Rect(rectRight.x + 8, 72, rectRight.width - 64, 60);
+                rectCommandReturn = new Rect(rectRight.x + rectRight.width - 64, 0, 64, 64);
             }
             else
             {
                 //Portrait
-                rectDebugLogBackground = new Rect(0, 0, Screen.width, (Screen.height / 2) - 64);
-                rectDebugLogScroll = new Rect(8, 24, Screen.width - 16, (Screen.height / 2) - 96);
-                rectDebugLogScrollDrag = new Rect(8, 24, Screen.width - 48, (Screen.height / 2) - 96);
-                rectDebugButtonClear = new Rect(0, (Screen.height / 2) - 64, 128, 64);
-                rectDebugButtonFontInc = new Rect(Screen.width - 128, (Screen.height / 2) - 64, 64, 64);
-                rectDebugButtonFontDesc = new Rect(Screen.width - 64, (Screen.height / 2) - 64, 64, 64);
-                rectCommandBackground = new Rect(0, (Screen.height / 2) + 64, Screen.width, (Screen.height / 2) - 64);
-                rectCommandArea = new Rect(8, (Screen.height / 2) + 136, Screen.width - 16, (Screen.height / 2) - 144);
-                rectCommandInput = new Rect(0, Screen.height / 2, Screen.width - 64, 64);
-                rectCommandHelpBox = new Rect(8, (Screen.height / 2) + 72, Screen.width - 64, 60);
-                rectCommandReturn = new Rect(Screen.width - 64, Screen.height / 2, 64, 64);
+                Rect rectTop = new Rect(rectScreen.x, rectScreen.y, rectScreen.width, rectScreen.height / 2);
+                Rect rectBottom = new Rect(rectScreen.x, rectScreen.y + rectScreen.height / 2, rectScreen.width, rectScreen.height / 2);
+                rectDebugLogBackground = new Rect(rectTop.x, rectTop.y, rectTop.width, rectTop.height - 64);
+                rectDebugLogScroll = new Rect(rectTop.x + 8, rectTop.y + 24, rectTop.width - 16, rectTop.height - 96);
+                rectDebugLogScrollDrag = new Rect(rectTop.x + 8, rectTop.y + 24, rectTop.width - 48, rectTop.height - 96);
+                rectDebugButtonClear = new Rect(rectTop.x, rectTop.y + rectTop.height - 64, 128, 64);
+                rectDebugButtonFontInc = new Rect(rectTop.width - 128, rectTop.y + rectTop.height - 64, 64, 64);
+                rectDebugButtonFontDesc = new Rect(rectTop.width - 64, rectTop.y + rectTop.height - 64, 64, 64);
+                rectCommandBackground = new Rect(rectBottom.x, rectBottom.y + 64, rectBottom.width, rectBottom.height - 64);
+                rectCommandArea = new Rect(rectBottom.x + 8, rectBottom.y + 136, rectBottom.width - 16, rectBottom.height - 144);
+                rectCommandInput = new Rect(rectBottom.x, rectBottom.y, rectBottom.width - 64, 64);
+                rectCommandHelpBox = new Rect(rectBottom.x + 8, rectBottom.y + 72, rectBottom.width - 64, 60);
+                rectCommandReturn = new Rect(rectBottom.x + rectBottom.width - 64, rectBottom.y, 64, 64);
             }
         }
 

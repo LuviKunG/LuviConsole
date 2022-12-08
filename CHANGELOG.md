@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.7.3
+
+- Add the device's notch support to display the console in the safe area.
+
 ## 2.7.2
 
 - Fix log panel issue that new console message will not show because  message count is over capacity.
