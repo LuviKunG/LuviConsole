@@ -4,7 +4,13 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.7.2 October 21st 2022 - Latest
+### v2.7.3 December 8th 2022 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.7.3`
+
+- Add the device's notch support to display the console in the safe area.
+
+### v2.7.2 October 21st 2022
 
 `https://github.com/LuviKunG/LuviConsole.git#2.7.2`
 

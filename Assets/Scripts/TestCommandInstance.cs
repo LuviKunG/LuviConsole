@@ -103,10 +103,9 @@ public class TestCommandInstance : MonoBehaviour
             else if (bool.TryParse(value, out bool valueBool))
                 data.Add(key, valueBool);
             else if (value.StartsWith("{") && value.EndsWith("}"))
-            {
-                Debug.Log(value);
                 data.Add(key, JsonUtility.FromJson<Dictionary<string, object>>(value));
-            }
+            else if (value.StartsWith("[") && value.EndsWith("]"))
+                data.Add(key, JsonUtility.FromJson<List<object>>(value));
             else
                 data.Add(key, value);
         }
