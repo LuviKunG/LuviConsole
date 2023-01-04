@@ -1,5 +1,10 @@
 # Change Log
 
+## 2.7.4
+
+- Add new feature of **Extend UI** to adjust the **LuviConsole** extended UI.
+- Fix wrong UI rect adjustment.
+
 ## 2.7.3
 
 - Add the device's notch support to display the console in the safe area.

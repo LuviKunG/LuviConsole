@@ -28,6 +28,124 @@ namespace LuviKunG.Console
             }
         }
 
+        [Serializable]
+        public struct Extend2D
+        {
+            public float up;
+            public float down;
+            public float left;
+            public float right;
+
+            public float width => left + right;
+            public float height => up + down;
+
+            public Extend2D(float up, float down, float left, float right)
+            {
+                this.up = up;
+                this.down = down;
+                this.left = left;
+                this.right = right;
+            }
+
+            public Extend2D(float vertical, float horizontal)
+            {
+                this.up = vertical;
+                this.down = vertical;
+                this.left = horizontal;
+                this.right = horizontal;
+            }
+
+            public Extend2D(float all)
+            {
+                this.up = all;
+                this.down = all;
+                this.left = all;
+                this.right = all;
+            }
+
+            public static Extend2D operator +(Extend2D a, Extend2D b)
+            {
+                return new Extend2D(a.up + b.up, a.down + b.down, a.left + b.left, a.right + b.right);
+            }
+
+            public static Extend2D operator -(Extend2D a, Extend2D b)
+            {
+                return new Extend2D(a.up - b.up, a.down - b.down, a.left - b.left, a.right - b.right);
+            }
+
+            public static Extend2D operator *(Extend2D a, Extend2D b)
+            {
+                return new Extend2D(a.up * b.up, a.down * b.down, a.left * b.left, a.right * b.right);
+            }
+
+            public static Extend2D operator /(Extend2D a, Extend2D b)
+            {
+                return new Extend2D(a.up / b.up, a.down / b.down, a.left / b.left, a.right / b.right);
+            }
+
+            public static Extend2D operator +(Extend2D a, float b)
+            {
+                return new Extend2D(a.up + b, a.down + b, a.left + b, a.right + b);
+            }
+
+            public static Extend2D operator -(Extend2D a, float b)
+            {
+                return new Extend2D(a.up - b, a.down - b, a.left - b, a.right - b);
+            }
+
+            public static Extend2D operator *(Extend2D a, float b)
+            {
+                return new Extend2D(a.up * b, a.down * b, a.left * b, a.right * b);
+            }
+
+            public static Extend2D operator /(Extend2D a, float b)
+            {
+                return new Extend2D(a.up / b, a.down / b, a.left / b, a.right / b);
+            }
+
+            public static Extend2D operator +(float a, Extend2D b)
+            {
+                return new Extend2D(a + b.up, a + b.down, a + b.left, a + b.right);
+            }
+
+            public static Extend2D operator -(float a, Extend2D b)
+            {
+                return new Extend2D(a - b.up, a - b.down, a - b.left, a - b.right);
+            }
+
+            public static Extend2D operator *(float a, Extend2D b)
+            {
+                return new Extend2D(a * b.up, a * b.down, a * b.left, a * b.right);
+            }
+
+            public static Extend2D operator /(float a, Extend2D b)
+            {
+                return new Extend2D(a / b.up, a / b.down, a / b.left, a / b.right);
+            }
+
+            public static bool operator ==(Extend2D a, Extend2D b)
+            {
+                return a.up == b.up && a.down == b.down && a.left == b.left && a.right == b.right;
+            }
+
+            public static bool operator !=(Extend2D a, Extend2D b)
+            {
+                return a.up != b.up || a.down != b.down || a.left != b.left || a.right != b.right;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Extend2D other)
+                    return up == other.up && down == other.down && left == other.left && right == other.right;
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+        }
+
         private const string DEFAULT_PREFAB_RESOURCE_PATH = "LuviKunG/LuviConsole";
         private const string DEFAULT_GUISKIN_RESOURCE_PATH = "LuviConsoleGUI";
 
@@ -116,6 +234,11 @@ namespace LuviKunG.Console
         /// </summary>
         public KeyCode[] keys = new KeyCode[] { KeyCode.F1 };
 
+        /// <summary>
+        /// Extend the LuviConsole GUI window.
+        /// </summary>
+        public Extend2D extendUI = new Extend2D(0);
+        
         private void Awake()
         {
             if (instance == null)
@@ -437,6 +560,8 @@ namespace LuviKunG.Console
         {
             Rect safeArea = Screen.safeArea;
             Rect rectScreen = new Rect(safeArea.x, Screen.height - (safeArea.y + safeArea.height), safeArea.width, safeArea.height);
+            Rect rectExtendUI = new Rect(rectScreen.x + extendUI.left, rectScreen.y + extendUI.up, rectScreen.width - extendUI.width, rectScreen.height - extendUI.height);
+            rectScreen = rectExtendUI;
             if (rectScreen.width > rectScreen.height)
             {
                 //Landscape
@@ -450,9 +575,9 @@ namespace LuviKunG.Console
                 rectDebugButtonFontDesc = new Rect(rectLeft.x + rectLeft.width - 64, rectLeft.y + rectLeft.height - 64, 64, 64);
                 rectCommandBackground = new Rect(rectRight.x, rectRight.y + 64, rectRight.width, rectRight.height - 64);
                 rectCommandArea = new Rect(rectRight.x + 8, rectRight.y + 136, rectRight.width - 16, rectRight.height - 144);
-                rectCommandInput = new Rect(rectRight.x, 0, rectRight.width - 64, 64);
-                rectCommandHelpBox = new Rect(rectRight.x + 8, 72, rectRight.width - 64, 60);
-                rectCommandReturn = new Rect(rectRight.x + rectRight.width - 64, 0, 64, 64);
+                rectCommandInput = new Rect(rectRight.x, rectRight.y, rectRight.width - 64, 64);
+                rectCommandHelpBox = new Rect(rectRight.x + 8, rectRight.y + 72, rectRight.width - 64, 60);
+                rectCommandReturn = new Rect(rectRight.x + rectRight.width - 64, rectRight.y, 64, 64);
             }
             else
             {
@@ -463,8 +588,8 @@ namespace LuviKunG.Console
                 rectDebugLogScroll = new Rect(rectTop.x + 8, rectTop.y + 24, rectTop.width - 16, rectTop.height - 96);
                 rectDebugLogScrollDrag = new Rect(rectTop.x + 8, rectTop.y + 24, rectTop.width - 48, rectTop.height - 96);
                 rectDebugButtonClear = new Rect(rectTop.x, rectTop.y + rectTop.height - 64, 128, 64);
-                rectDebugButtonFontInc = new Rect(rectTop.width - 128, rectTop.y + rectTop.height - 64, 64, 64);
-                rectDebugButtonFontDesc = new Rect(rectTop.width - 64, rectTop.y + rectTop.height - 64, 64, 64);
+                rectDebugButtonFontInc = new Rect(rectTop.x + rectTop.width - 128, rectTop.y + rectTop.height - 64, 64, 64);
+                rectDebugButtonFontDesc = new Rect(rectTop.x + rectTop.width - 64, rectTop.y + rectTop.height - 64, 64, 64);
                 rectCommandBackground = new Rect(rectBottom.x, rectBottom.y + 64, rectBottom.width, rectBottom.height - 64);
                 rectCommandArea = new Rect(rectBottom.x + 8, rectBottom.y + 136, rectBottom.width - 16, rectBottom.height - 144);
                 rectCommandInput = new Rect(rectBottom.x, rectBottom.y, rectBottom.width - 64, 64);
