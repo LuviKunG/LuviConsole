@@ -4,7 +4,14 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.7.3 December 8th 2022 - Latest
+### v2.7.4 January 4th 2023 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.7.4`
+
+- Add new feature of **Extend UI** to adjust the **LuviConsole** extended UI.
+- Fix wrong UI rect adjustment.
+
+### v2.7.3 December 8th 2022
 
 `https://github.com/LuviKunG/LuviConsole.git#2.7.3`
 

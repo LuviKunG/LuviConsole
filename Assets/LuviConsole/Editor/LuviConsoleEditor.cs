@@ -8,7 +8,7 @@ namespace LuviKunG.Console.Editor
     [CustomEditor(typeof(LuviConsole))]
     public sealed class LuviConsoleEditor : UnityEditor.Editor
     {
-        private const string LABEL_VERSION = "LuviConsole Version 2.7.3";
+        private const string LABEL_VERSION = "LuviConsole Version 2.7.4";
         private const string WARNING_ASSIGN_KEY = "Please assign key.";
 
         private readonly GUIContent contentLogCapacity = new GUIContent("Log Capacity", "The capacity of list that will show debug log on console window.");
@@ -22,6 +22,7 @@ namespace LuviKunG.Console.Editor
         private readonly GUIContent contentAutoShowException = new GUIContent("Show Log When Exception", "Automatically show logs when player is get exception log.");
         private readonly GUIContent contentCommandLog = new GUIContent("Log Command", "Log the command after you executed.");
         private readonly GUIContent contentKeys = new GUIContent("Keys", "Keys to toggle open and close of the console.");
+        private readonly GUIContent contentExtendUI = new GUIContent("Extend UI", "Control extend size of UI of the console.");
 
         private LuviConsole console;
         private SerializedProperty logCapacity;
@@ -35,8 +36,15 @@ namespace LuviKunG.Console.Editor
         private SerializedProperty autoShowException;
         private SerializedProperty commandLog;
         private SerializedProperty keys;
+        private SerializedProperty extendUI;
+        private SerializedProperty extendUp;
+        private SerializedProperty extendDown;
+        private SerializedProperty extendLeft;
+        private SerializedProperty extendRight;
 
         private ReorderableList reorderListKey;
+
+        private bool isShowExtendUI;
 
 #if UNITY_ANDROID || UNITY_IOS
         private GUIStyle miniLabelStyle;
@@ -56,6 +64,11 @@ namespace LuviKunG.Console.Editor
             autoShowException = serializedObject.FindProperty(nameof(console.autoShowException));
             commandLog = serializedObject.FindProperty(nameof(console.commandLog));
             keys = serializedObject.FindProperty(nameof(console.keys));
+            extendUI = serializedObject.FindProperty(nameof(console.extendUI));
+            extendUp = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.up));
+            extendDown = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.down));
+            extendLeft = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.left));
+            extendRight = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.right));
 
             if (reorderListKey == null)
             {
@@ -149,6 +162,20 @@ namespace LuviKunG.Console.Editor
                 autoShowException.boolValue = EditorGUILayout.Toggle(contentAutoShowException, autoShowException.boolValue);
                 commandLog.boolValue = EditorGUILayout.Toggle(contentCommandLog, commandLog.boolValue);
                 reorderListKey.DoLayoutList();
+                isShowExtendUI = EditorGUILayout.Foldout(isShowExtendUI, contentExtendUI);
+                if (isShowExtendUI)
+                {
+                    using (new EditorGUILayout.VerticalScope())
+                    {
+                        using (new EditorGUI.IndentLevelScope())
+                        {
+                            extendUp.floatValue = EditorGUILayout.FloatField("Up", extendUp.floatValue);
+                            extendDown.floatValue = EditorGUILayout.FloatField("Down", extendDown.floatValue);
+                            extendLeft.floatValue = EditorGUILayout.FloatField("Left", extendLeft.floatValue);
+                            extendRight.floatValue = EditorGUILayout.FloatField("Right", extendRight.floatValue);
+                        }
+                    }
+                }
                 using (new EditorGUILayout.VerticalScope())
                 {
                     bool wasContainNone = false;
