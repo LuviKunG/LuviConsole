@@ -26,11 +26,21 @@ namespace LuviKunG.Examples
                     Debug.Log($"args[{i}] = " + args[i]);
             });
 
+            // Add a new command of '/throw' that will cause an exception for testing.
+            console.AddCommand("/throw", (args) =>
+            {
+                // You can throw an exception like this and it will not crash the console.
+                throw new System.Exception("Test throwing exception during execute the command.");
+            });
+
             // Add a new command preset of '/foo' that will be show as button below of command input in the group of 'Testing'.
             console.AddCommandPreset("/foo", "Foo", "Just test command of foo", "Testing", false);
 
             // Add a new command preset of '/test' that will be show as button below of command input in the group of 'Testing' and will execute immediately when pressed.
             console.AddCommandPreset("/test \"Hello World!\"", "Test", "Just test command of test", "Testing", true);
+
+            // Add a new command preset of '/throw' that will be show as button below of command input in the group of 'Testing' and will execute immediately when pressed.
+            console.AddCommandPreset("/throw", "Throw", "Just test command of throw", "Testing", true);
 
             // This is custom log for putting message in console directly without receive debug log.
             console.Log("This is custom log");

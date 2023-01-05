@@ -1,5 +1,10 @@
 # Change Log
 
+## 2.7.5
+
+- Add an exception catch block when executing the command to prevent crash in **LuviConsole**.
+- Add various argument exception while adding the command to prevent unexpected behavior.
+
 ## 2.7.4
 
 - Add new feature of **Extend UI** to adjust the **LuviConsole** extended UI.
