@@ -4,7 +4,14 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.7.4 January 4th 2023 - Latest
+### v2.7.5 January 5th 2023 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.7.5`
+
+- Add an exception catch block when executing the command to prevent crash in **LuviConsole**.
+- Add various argument exception while adding the command to prevent unexpected behavior.
+
+### v2.7.4 January 4th 2023
 
 `https://github.com/LuviKunG/LuviConsole.git#2.7.4`
 

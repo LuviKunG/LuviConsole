@@ -35,6 +35,11 @@ public class TestCommandInstance : MonoBehaviour
             Debug.Log(variant);
         });
 
+        console.AddCommand("/throw", (args) =>
+        {
+            throw new System.Exception("Test throwing exception during execute the command.");
+        });
+
         // Add a new command preset of '/foo' that will be show as button below of command input in the group of 'Testing'.
         console.AddCommandPreset("/foo", "Foo", "Just test command of foo", "Testing", false);
 
@@ -44,6 +49,8 @@ public class TestCommandInstance : MonoBehaviour
         console.AddCommandPreset("/parse data {\"name\":\"LuviKunG\",\"age\":20} data2 {\"hello\":\"world\"}", "Parse", "Just test command of parse", "Testing", true);
         //console.AddCommandPreset("{\"hello\":\"world\"} \"hello world\"", "Parse 2", "Just test command of parse 2", "Testing", true);
         //console.AddCommandPreset("\"hello world\" {\"hello\":\"world\"} \"yes\"", "Parse 3", "Just test command of parse 3", "Testing", true);
+
+        console.AddCommandPreset("/throw", "Throw", "Just test command of throw", "Testing", true);
 
         // This is custom log for putting message in console directly without receive debug log.
         console.Log("This is custom log");

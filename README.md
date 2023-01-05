@@ -51,11 +51,21 @@ public class TestCommandInstance : MonoBehaviour
                 Debug.Log($"args[{i}] = " + args[i]);
         });
 
+        // Add a new command of '/throw' that will cause an exception for testing.
+        console.AddCommand("/throw", (args) =>
+        {
+            // You can throw an exception like this and it will not crash the console.
+            throw new System.Exception("Test throwing exception during execute the command.");
+        });
+
         // Add a new command preset of '/foo' that will be show as button below of command input in the group of 'Testing'.
         console.AddCommandPreset("/foo", "Foo", "Just test command of foo", "Testing", false);
 
         // Add a new command preset of '/test' that will be show as button below of command input in the group of 'Testing' and will execute immediately when pressed.
         console.AddCommandPreset("/test \"Hello World!\"", "Test", "Just test command of test", "Testing", true);
+
+        // Add a new command preset of '/throw' that will be show as button below of command input in the group of 'Testing' and will execute immediately when pressed.
+        console.AddCommandPreset("/throw", "Throw", "Just test command of throw", "Testing", true);
 
         // This is custom log for putting message in console directly without receive debug log.
         console.Log("This is custom log");
@@ -91,7 +101,7 @@ Then merge this json format below.
 ```json
 {
   "dependencies": {
-    "com.luvikung.luviconsole": "https://github.com/LuviKunG/LuviConsole.git#2.7.4"
+    "com.luvikung.luviconsole": "https://github.com/LuviKunG/LuviConsole.git#2.7.5"
   }
 }
 ```
@@ -106,13 +116,13 @@ In Unity 2019.3 or greater, Package Manager is include the new feature that able
 
 Just simply using this git URL and following with version like this example.
 
-**https://github.com/LuviKunG/LuviConsole.git#2.7.4**
+**https://github.com/LuviKunG/LuviConsole.git#2.7.5**
 
 Make sure that you're select the latest version.
 
 ### Unity UPM Git Extension (For 2019.2 and older version)
 
-Please note that ```LuviConsole``` isn't support for Unity 2019 or below anymore, but it's still working.
+Please note that ```LuviConsole``` isn't support for Unity 2019 or below anymore, but it is still working properly.
 
 If you doesn't have this package before, please redirect to this git [https://github.com/mob-sakai/UpmGitExtension](https://github.com/mob-sakai/UpmGitExtension) then follow the instruction in README.md to install the **UPM Git Extension** to your Unity.
 

@@ -238,7 +238,7 @@ namespace LuviKunG.Console
         /// Extend the LuviConsole GUI window.
         /// </summary>
         public Extend2D extendUI = new Extend2D(0);
-        
+
         private void Awake()
         {
             if (instance == null)
@@ -731,10 +731,17 @@ namespace LuviKunG.Console
         /// <param name="execution">Execution callback function.</param>
         public void AddCommand(string prefix, LuviCommandExecution execution)
         {
-            if (!commandData.ContainsKey(prefix))
-                commandData.Add(prefix, execution);
-            else
-                throw new InvalidOperationException($"Already have {prefix} command.");
+            if (string.IsNullOrWhiteSpace(prefix))
+                throw new ArgumentNullException("Prefix cannot be null or empty.");
+#if !LUVI_CONSOLE_ADD_COMMAND_EXCLUDE_START_WITH_SLASH
+            if (!prefix.StartsWith('/'))
+                throw new ArgumentException("Prefix must start with slash (/) character.");
+#endif
+            if (prefix.Contains(' '))
+                throw new ArgumentException("Prefix cannot contains any white space.");
+            if (commandData.ContainsKey(prefix))
+                throw new InvalidOperationException($"Commands are already contains prefix \'{prefix}\' command.");
+            commandData.Add(prefix, execution);
         }
 
         /// <summary>
@@ -865,11 +872,20 @@ namespace LuviKunG.Console
                 if (arguments.Count > 0)
                 {
                     string prefix = arguments[0];
+                    LogExecuteCommands(command);
                     if (commandData.ContainsKey(prefix))
                     {
-                        commandData[prefix].Invoke(arguments);
-                        LogExecuteCommands(command);
-                        return true;
+                        bool isSuccess = false;
+                        try
+                        {
+                            commandData[prefix].Invoke(arguments);
+                            isSuccess = true;
+                        }
+                        catch (Exception e)
+                        {
+                            LogReceiveCallback(e.Message, e.StackTrace, LogType.Exception);
+                        }
+                        return isSuccess;
                     }
                     else
                     {
@@ -877,7 +893,6 @@ namespace LuviKunG.Console
                         str.Append($"No command \'{prefix}\' were found.");
                         str.Color(LOG_COLOR_COMMAND);
                         Log(str.ToString());
-                        LogExecuteCommands(command);
                         return false;
                     }
                 }
