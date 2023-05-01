@@ -296,24 +296,7 @@ namespace LuviKunG.Console
 
         private void UpdateInput()
         {
-#if UNITY_EDITOR
-            if (keys == null || keys.Length == 0)
-                return;
-            bool isKey = true;
-            for (int i = 0; i < keys.Length - 1; ++i)
-            {
-                if (!Input.GetKey(keys[i]))
-                {
-                    isKey = false;
-                    return;
-                }
-            }
-            if (isKey && Input.GetKeyDown(keys[keys.Length - 1]))
-            {
-                ToggleConsole();
-                GUI.FocusControl("commandfield");
-            }
-#elif UNITY_ANDROID || UNITY_IOS
+#if UNITY_ANDROID || UNITY_IOS
             if (Input.GetMouseButtonDown(0))
             {
                 _swipePosStart = Input.mousePosition;
@@ -341,7 +324,23 @@ namespace LuviKunG.Console
                     }
                 }
             }
-#elif UNITY_WEBGL
+#else
+            if (keys == null || keys.Length == 0)
+                return;
+            bool isKey = true;
+            for (int i = 0; i < keys.Length - 1; ++i)
+            {
+                if (!Input.GetKey(keys[i]))
+                {
+                    isKey = false;
+                    return;
+                }
+            }
+            if (isKey && Input.GetKeyDown(keys[keys.Length - 1]))
+            {
+                ToggleConsole();
+                GUI.FocusControl("commandfield");
+            }
 #endif
         }
 
@@ -405,7 +404,7 @@ namespace LuviKunG.Console
         private int logExecutePosition;
         private int indexConsole;
         private int indexDebug;
-#if !(UNITY_EDITOR || UNITY_EDITOR_OSX || UNITY_WEBGL) && (UNITY_ANDROID || UNITY_IOS)
+#if !(UNITY_EDITOR || UNITY_EDITOR_OSX) && (UNITY_ANDROID || UNITY_IOS)
         private Vector3 _swipePosStart = Vector3.zero;
         private Vector3 _swipePosMoving = Vector3.zero;
 #endif

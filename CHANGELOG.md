@@ -4,7 +4,13 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.7.5 January 5th 2023 - Latest
+### v2.7.6 May 1st 2023 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#2.7.6`
+
+- Fix unable to toggle `LuviConsole` by pressing desire keys while building other build target that didn't from Android or iOS.
+
+### v2.7.5 January 5th 2023
 
 `https://github.com/LuviKunG/LuviConsole.git#2.7.5`
 

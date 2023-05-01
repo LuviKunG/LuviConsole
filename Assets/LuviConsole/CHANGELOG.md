@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.7.6
+
+- Fix unable to toggle **LuviConsole** by pressing desire keys while building other build target that didn't from Android or iOS.
+
 ## 2.7.5
 
 - Add an exception catch block when executing the command to prevent crash in **LuviConsole**.
@@ -25,7 +29,7 @@
 
 ## 2.7.0
 
-- Add new public function of ```ExecuteCommand(string commandString)``` for execute the command directly in run-time.
+- Add new public function of `ExecuteCommand(string commandString)` for execute the command directly in run-time.
 - Improve the editor inspector.
   - Add help URL to the git repository.
   - Able to validate keys to toggle the console.
@@ -66,9 +70,9 @@
 
 ## 2.4.3
 
-- namespace **LuviKunG.Console** is required. (```using LuviKunG.Console;```)
-- Make ```LuviConsole``` as plugin manager and separate with **LuviTools** git.
-- Remove requirement of ```StringBuilderRichTextExtension``` and using internal coloring rich text.
+- namespace **LuviKunG.Console** is required. (`using LuviKunG.Console;`)
+- Make `LuviConsole` as plugin manager and separate with **LuviTools** git.
+- Remove requirement of `StringBuilderRichTextExtension` and using internal coloring rich text.
 
 ## 2.4.2
 
@@ -79,19 +83,19 @@
 - New **Command Group** that using for grouping your command.
 - New **Execute Command Immediately** option that will execute the command instantly when press the command button.
 - Remove internal Rich Text display for Log. But...
-- Require extension of ```StringBuilderRichTextExtension``` to display rich text in Log.
+- Require extension of `StringBuilderRichTextExtension` to display rich text in Log.
 - New **Command Log** to display your executed command in Log.
 
 ## 2.4.0
 
-- namespace **LuviKunG** is required. (```using LuviKunG;```)
+- namespace **LuviKunG** is required. (`using LuviKunG;`)
 - WebGL support.
 - New drag scroll view on log. (working on all platform)
 - New LuviCommand syntax.
     - Now you can use string in your command by using quote "Your string here" to get full string without serparate by space.
     - Fix bugs that execute by double quote and got an error.
 - Add realtime update window size and orientation.
-- Add ```LuviConsoleException``` to throw error during execute the command.
+- Add `LuviConsoleException` to throw error during execute the command.
 
 ## 2.3.6
 
@@ -101,4 +105,4 @@
 
 ## Initial Version
 
-- Combine ```LuviDebug``` and ```LuviCommand``` into one as ```LuviConsole```.
+- Combine `LuviDebug` and `LuviCommand` into one as `LuviConsole`.

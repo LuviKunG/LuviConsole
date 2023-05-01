@@ -8,7 +8,7 @@ namespace LuviKunG.Console.Editor
     [CustomEditor(typeof(LuviConsole))]
     public sealed class LuviConsoleEditor : UnityEditor.Editor
     {
-        private const string LABEL_VERSION = "LuviConsole Version 2.7.5";
+        private const string LABEL_VERSION = "LuviConsole Version 2.7.6";
         private const string WARNING_ASSIGN_KEY = "Please assign key.";
 
         private readonly GUIContent contentLogCapacity = new GUIContent("Log Capacity", "The capacity of list that will show debug log on console window.");
