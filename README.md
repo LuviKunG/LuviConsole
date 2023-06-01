@@ -90,6 +90,32 @@ Please checkout the [changelog](CHANGELOG.md) if you want to see the older versi
 
 ## How to install?
 
+### Package Manager in Unity Editor
+
+In Unity 2019.3 or greater, Package Manager is include the new feature that able to install the package via Git.
+
+![Install with Git URL](images/giturl.png)
+
+Just simply put the git URL and following with tags. For example,
+
+#### For latest version.
+
+```
+https://github.com/LuviKunG/LuviConsole.git#upm
+```
+
+#### For specific version.
+
+```
+https://github.com/LuviKunG/LuviConsole.git#(put the version number tag)
+...
+https://github.com/LuviKunG/LuviConsole.git#3.0.0
+https://github.com/LuviKunG/LuviConsole.git#2.7.6
+https://github.com/LuviKunG/LuviConsole.git#2.7.5
+```
+
+You can check the different version by taking a look at [CHANGELOG](/CHANGELOG.md)
+
 ### UPM Install via manifest.json
 
 Locate to your Unity Project. In *Packages* folder, you will see a file named **manifest.json**. Open it with your text editor (such as Notepad++ or Visual Studio Code or Legacy Notepad)
@@ -101,24 +127,12 @@ Then merge this json format below.
 ```json
 {
   "dependencies": {
-    "com.luvikung.luviconsole": "https://github.com/LuviKunG/LuviConsole.git#2.7.6"
+    "com.luvikung.luviconsole": "https://github.com/LuviKunG/LuviConsole.git#upm"
   }
 }
 ```
 
 If you want to install the older version, please take a look at release tag in this git, then change the path after **#** to the version tag that you want.
-
-### Unity 2019.3 Git URL
-
-In Unity 2019.3 or greater, Package Manager is include the new feature that able to install the package via Git.
-
-![Install with Git URL](images/giturl.png)
-
-Just simply using this git URL and following with version like this example.
-
-**https://github.com/LuviKunG/LuviConsole.git#2.7.6**
-
-Make sure that you're select the latest version.
 
 ### Unity UPM Git Extension (For 2019.2 and older version)
 
@@ -127,5 +141,3 @@ Please note that ```LuviConsole``` isn't support for Unity 2019 or below anymore
 If you doesn't have this package before, please redirect to this git [https://github.com/mob-sakai/UpmGitExtension](https://github.com/mob-sakai/UpmGitExtension) then follow the instruction in README.md to install the **UPM Git Extension** to your Unity.
 
 If you already installed. Open the **Package Manager UI**, you will see the git icon around the bottom left connor, Open it then follow the instruction using this git URL to perform package install.
-
-Make sure that you're select the latest version.

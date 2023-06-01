@@ -1,5 +1,13 @@
 # Change Log
 
+## 3.0.0
+
+- Add new preview window for showing types and amount of logs.
+- Add options to toggle show/hide preview window.
+- Add options to change preview window anchored position.
+- Add options to adjust preview window size.
+- Redesign the **LuviConsole** editor inspector to separate configure between console window and preview window.
+
 ## 2.7.6
 
 - Fix unable to toggle **LuviConsole** by pressing desire keys while building other build target that didn't from Android or iOS.

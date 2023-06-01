@@ -4,4 +4,4 @@ LuviConsole is a console GUI of Unity that include custom command. Created by Th
 
 ## How to use?
 
-Check out the README in [repository](https://github.com/LuviKunG/LuviConsole).
+Please check out the README in this [repository](https://github.com/LuviKunG/LuviConsole).

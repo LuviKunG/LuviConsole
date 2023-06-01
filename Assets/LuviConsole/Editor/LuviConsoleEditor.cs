@@ -8,7 +8,7 @@ namespace LuviKunG.Console.Editor
     [CustomEditor(typeof(LuviConsole))]
     public sealed class LuviConsoleEditor : UnityEditor.Editor
     {
-        private const string LABEL_VERSION = "LuviConsole Version 2.7.6";
+        private const string LABEL_VERSION = "LuviConsole Version 3.0.0";
         private const string WARNING_ASSIGN_KEY = "Please assign key.";
 
         private readonly GUIContent contentLogCapacity = new GUIContent("Log Capacity", "The capacity of list that will show debug log on console window.");
@@ -21,8 +21,13 @@ namespace LuviKunG.Console.Editor
         private readonly GUIContent contentAutoShowError = new GUIContent("Show Log When Error", "Automatically show logs when player is get error log.");
         private readonly GUIContent contentAutoShowException = new GUIContent("Show Log When Exception", "Automatically show logs when player is get exception log.");
         private readonly GUIContent contentCommandLog = new GUIContent("Log Command", "Log the command after you executed.");
-        private readonly GUIContent contentKeys = new GUIContent("Keys", "Keys to toggle open and close of the console.");
-        private readonly GUIContent contentExtendUI = new GUIContent("Extend UI", "Control extend size of UI of the console.");
+        private readonly GUIContent contentToggleConsoleKeys = new GUIContent("Toggle Console Keys", "Keys to toggle open and close of the console.");
+        private readonly GUIContent contentTogglePreviewKeys = new GUIContent("Toggle Preview Keys", "Keys to toggle open and close of the preview.");
+        private readonly GUIContent contentPreviewAnchorPosition = new GUIContent("Preview Anchor Position", "Define anchor position of preview window.");
+        private readonly GUIContent contentPreviewSize = new GUIContent("Preview Size", "Define size of preview window.");
+        private readonly GUIContent contentSettingsConsole = new GUIContent("Console settings", "Settings of console.");
+        private readonly GUIContent contentSettingsPreview = new GUIContent("Preview settings", "Settings of preview.");
+        private readonly GUIContent contentExtendUI = new GUIContent("Extend UI", "Control extend size of UI of the GUI.");
 
         private LuviConsole console;
         private SerializedProperty logCapacity;
@@ -35,15 +40,21 @@ namespace LuviKunG.Console.Editor
         private SerializedProperty autoShowError;
         private SerializedProperty autoShowException;
         private SerializedProperty commandLog;
-        private SerializedProperty keys;
+        private SerializedProperty toggleConsoleKeys;
+        private SerializedProperty togglePreviewKeys;
+        private SerializedProperty previewAnchorPosition;
+        private SerializedProperty previewSize;
         private SerializedProperty extendUI;
-        private SerializedProperty extendUp;
-        private SerializedProperty extendDown;
-        private SerializedProperty extendLeft;
-        private SerializedProperty extendRight;
+        private SerializedProperty extendUITop;
+        private SerializedProperty extendUIBottom;
+        private SerializedProperty extendUILeft;
+        private SerializedProperty extendUIRight;
 
-        private ReorderableList reorderListKey;
+        private ReorderableList reorderListConsoleKeys;
+        private ReorderableList reorderListPreviewKeys;
 
+        private bool isShowSettingConsole;
+        private bool isShowSettingPreview;
         private bool isShowExtendUI;
 
 #if UNITY_ANDROID || UNITY_IOS
@@ -63,27 +74,30 @@ namespace LuviKunG.Console.Editor
             autoShowError = serializedObject.FindProperty(nameof(console.autoShowError));
             autoShowException = serializedObject.FindProperty(nameof(console.autoShowException));
             commandLog = serializedObject.FindProperty(nameof(console.commandLog));
-            keys = serializedObject.FindProperty(nameof(console.keys));
+            toggleConsoleKeys = serializedObject.FindProperty(nameof(console.toggleConsoleKeys));
+            togglePreviewKeys = serializedObject.FindProperty(nameof(console.togglePreviewKeys));
+            previewAnchorPosition = serializedObject.FindProperty(nameof(console.previewAnchorPosition));
+            previewSize = serializedObject.FindProperty(nameof(console.previewSize));
             extendUI = serializedObject.FindProperty(nameof(console.extendUI));
-            extendUp = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.up));
-            extendDown = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.down));
-            extendLeft = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.left));
-            extendRight = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.right));
+            extendUITop = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.top));
+            extendUIBottom = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.bottom));
+            extendUILeft = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.left));
+            extendUIRight = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.right));
 
-            if (reorderListKey == null)
+            if (reorderListConsoleKeys == null)
             {
-                reorderListKey = new ReorderableList(serializedObject, keys, true, true, true, true);
-                reorderListKey.drawHeaderCallback = (rect) =>
+                reorderListConsoleKeys = new ReorderableList(serializedObject, toggleConsoleKeys, true, true, true, true);
+                reorderListConsoleKeys.drawHeaderCallback = (rect) =>
                 {
-                    GUI.Label(rect, contentKeys);
+                    GUI.Label(rect, contentToggleConsoleKeys);
                 };
-                reorderListKey.elementHeightCallback = (index) =>
+                reorderListConsoleKeys.elementHeightCallback = (index) =>
                 {
                     return EditorGUIUtility.singleLineHeight;
                 };
-                reorderListKey.drawElementCallback = (rect, index, isActive, isFocus) =>
+                reorderListConsoleKeys.drawElementCallback = (rect, index, isActive, isFocus) =>
                 {
-                    var property = reorderListKey.serializedProperty;
+                    var property = reorderListConsoleKeys.serializedProperty;
                     var sp = property.GetArrayElementAtIndex(index);
                     using (var changeScope = new EditorGUI.ChangeCheckScope())
                     {
@@ -94,16 +108,16 @@ namespace LuviKunG.Console.Editor
                         }
                     }
                 };
-                reorderListKey.drawNoneElementCallback = (rect) =>
+                reorderListConsoleKeys.drawNoneElementCallback = (rect) =>
                 {
                     EditorGUI.HelpBox(rect, WARNING_ASSIGN_KEY, MessageType.Error);
                 };
-                reorderListKey.onReorderCallback = (list) =>
+                reorderListConsoleKeys.onReorderCallback = (list) =>
                 {
                     var property = list.serializedProperty;
                     property.serializedObject.ApplyModifiedProperties();
                 };
-                reorderListKey.onAddCallback = (list) =>
+                reorderListConsoleKeys.onAddCallback = (list) =>
                 {
                     var property = list.serializedProperty;
                     property.InsertArrayElementAtIndex(property.arraySize);
@@ -111,7 +125,56 @@ namespace LuviKunG.Console.Editor
                     sp.intValue = (int)KeyCode.None;
                     property.serializedObject.ApplyModifiedProperties();
                 };
-                reorderListKey.onRemoveCallback = (list) =>
+                reorderListConsoleKeys.onRemoveCallback = (list) =>
+                {
+                    var property = list.serializedProperty;
+                    var index = list.selectedIndices.Count > 0 ? list.selectedIndices[0] : property.arraySize - 1;
+                    property.DeleteArrayElementAtIndex(index);
+                    property.serializedObject.ApplyModifiedProperties();
+                };
+            }
+            if (reorderListPreviewKeys == null)
+            {
+                reorderListPreviewKeys = new ReorderableList(serializedObject, togglePreviewKeys, true, true, true, true);
+                reorderListPreviewKeys.drawHeaderCallback = (rect) =>
+                {
+                    GUI.Label(rect, contentTogglePreviewKeys);
+                };
+                reorderListPreviewKeys.elementHeightCallback = (index) =>
+                {
+                    return EditorGUIUtility.singleLineHeight;
+                };
+                reorderListPreviewKeys.drawElementCallback = (rect, index, isActive, isFocus) =>
+                {
+                    var property = reorderListPreviewKeys.serializedProperty;
+                    var sp = property.GetArrayElementAtIndex(index);
+                    using (var changeScope = new EditorGUI.ChangeCheckScope())
+                    {
+                        sp.intValue = (int)(KeyCode)EditorGUI.EnumPopup(rect, (KeyCode)sp.intValue);
+                        if (changeScope.changed)
+                        {
+                            property.serializedObject.ApplyModifiedProperties();
+                        }
+                    }
+                };
+                reorderListPreviewKeys.drawNoneElementCallback = (rect) =>
+                {
+                    EditorGUI.HelpBox(rect, WARNING_ASSIGN_KEY, MessageType.Error);
+                };
+                reorderListPreviewKeys.onReorderCallback = (list) =>
+                {
+                    var property = list.serializedProperty;
+                    property.serializedObject.ApplyModifiedProperties();
+                };
+                reorderListPreviewKeys.onAddCallback = (list) =>
+                {
+                    var property = list.serializedProperty;
+                    property.InsertArrayElementAtIndex(property.arraySize);
+                    var sp = property.GetArrayElementAtIndex(property.arraySize - 1);
+                    sp.intValue = (int)KeyCode.None;
+                    property.serializedObject.ApplyModifiedProperties();
+                };
+                reorderListPreviewKeys.onRemoveCallback = (list) =>
                 {
                     var property = list.serializedProperty;
                     var index = list.selectedIndices.Count > 0 ? list.selectedIndices[0] : property.arraySize - 1;
@@ -161,54 +224,107 @@ namespace LuviKunG.Console.Editor
                 autoShowError.boolValue = EditorGUILayout.Toggle(contentAutoShowError, autoShowError.boolValue);
                 autoShowException.boolValue = EditorGUILayout.Toggle(contentAutoShowException, autoShowException.boolValue);
                 commandLog.boolValue = EditorGUILayout.Toggle(contentCommandLog, commandLog.boolValue);
-                reorderListKey.DoLayoutList();
-                isShowExtendUI = EditorGUILayout.Foldout(isShowExtendUI, contentExtendUI);
-                if (isShowExtendUI)
+                isShowSettingConsole = EditorGUILayout.Foldout(isShowSettingConsole, contentSettingsConsole);
+                if (isShowSettingConsole)
                 {
-                    using (new EditorGUILayout.VerticalScope())
+                    using (new EditorGUI.IndentLevelScope())
                     {
-                        using (new EditorGUI.IndentLevelScope())
+
+                        reorderListConsoleKeys.DoLayoutList();
+                        using (new EditorGUILayout.VerticalScope())
                         {
-                            extendUp.floatValue = EditorGUILayout.FloatField("Up", extendUp.floatValue);
-                            extendDown.floatValue = EditorGUILayout.FloatField("Down", extendDown.floatValue);
-                            extendLeft.floatValue = EditorGUILayout.FloatField("Left", extendLeft.floatValue);
-                            extendRight.floatValue = EditorGUILayout.FloatField("Right", extendRight.floatValue);
+                            bool wasContainNone = false;
+                            bool wasSameValue = false;
+                            for (int i = 0; i < toggleConsoleKeys.arraySize; ++i)
+                            {
+                                var sp = toggleConsoleKeys.GetArrayElementAtIndex(i);
+                                if (sp.intValue == (int)KeyCode.None)
+                                {
+                                    wasContainNone = true;
+                                    break;
+                                }
+                                for (int j = 0; j < toggleConsoleKeys.arraySize; ++j)
+                                {
+                                    if (i == j)
+                                        continue;
+                                    var spr = toggleConsoleKeys.GetArrayElementAtIndex(j);
+                                    if (sp.intValue == spr.intValue)
+                                    {
+                                        wasSameValue = true;
+                                        break;
+                                    }
+                                }
+                                if (wasSameValue)
+                                    break;
+                            }
+                            if (wasContainNone)
+                            {
+                                EditorGUILayout.HelpBox($"Keys cannot contains key code of none.", MessageType.Error, true);
+                            }
+                            if (wasSameValue)
+                            {
+                                EditorGUILayout.HelpBox($"Keys should not have the same multiple value.", MessageType.Error, true);
+                            }
                         }
                     }
                 }
-                using (new EditorGUILayout.VerticalScope())
+                isShowSettingPreview = EditorGUILayout.Foldout(isShowSettingPreview, contentSettingsPreview);
+                if (isShowSettingPreview)
                 {
-                    bool wasContainNone = false;
-                    bool wasSameValue = false;
-                    for (int i = 0; i < keys.arraySize; ++i)
+                    using (new EditorGUI.IndentLevelScope())
                     {
-                        var sp = keys.GetArrayElementAtIndex(i);
-                        if (sp.intValue == (int)KeyCode.None)
+                        reorderListPreviewKeys.DoLayoutList();
+                        using (new EditorGUILayout.VerticalScope())
                         {
-                            wasContainNone = true;
-                            break;
-                        }
-                        for (int j = 0; j < keys.arraySize; ++j)
-                        {
-                            if (i == j)
-                                continue;
-                            var spr = keys.GetArrayElementAtIndex(j);
-                            if (sp.intValue == spr.intValue)
+                            bool wasContainNone = false;
+                            bool wasSameValue = false;
+                            for (int i = 0; i < togglePreviewKeys.arraySize; ++i)
                             {
-                                wasSameValue = true;
-                                break;
+                                var sp = togglePreviewKeys.GetArrayElementAtIndex(i);
+                                if (sp.intValue == (int)KeyCode.None)
+                                {
+                                    wasContainNone = true;
+                                    break;
+                                }
+                                for (int j = 0; j < togglePreviewKeys.arraySize; ++j)
+                                {
+                                    if (i == j)
+                                        continue;
+                                    var spr = togglePreviewKeys.GetArrayElementAtIndex(j);
+                                    if (sp.intValue == spr.intValue)
+                                    {
+                                        wasSameValue = true;
+                                        break;
+                                    }
+                                }
+                                if (wasSameValue)
+                                    break;
+                            }
+                            if (wasContainNone)
+                            {
+                                EditorGUILayout.HelpBox($"Keys cannot contains key code of none.", MessageType.Error, true);
+                            }
+                            if (wasSameValue)
+                            {
+                                EditorGUILayout.HelpBox($"Keys should not have the same multiple value.", MessageType.Error, true);
                             }
                         }
-                        if (wasSameValue)
-                            break;
+                        previewAnchorPosition.intValue = (int)(TextAnchor)EditorGUILayout.EnumPopup(contentPreviewAnchorPosition, (TextAnchor)previewAnchorPosition.intValue);
+                        previewSize.vector2Value = EditorGUILayout.Vector2Field(contentPreviewSize, previewSize.vector2Value);
                     }
-                    if (wasContainNone)
+                }
+                isShowExtendUI = EditorGUILayout.Foldout(isShowExtendUI, contentExtendUI);
+                if (isShowExtendUI)
+                {
+                    using (new EditorGUI.IndentLevelScope())
                     {
-                        EditorGUILayout.HelpBox($"Keys cannot contains key code of none.", MessageType.Error, true);
-                    }
-                    if (wasSameValue)
-                    {
-                        EditorGUILayout.HelpBox($"Keys should not have the same multiple value.", MessageType.Error, true);
+                        using (new EditorGUILayout.VerticalScope())
+                        {
+                            extendUITop.floatValue = EditorGUILayout.FloatField("Top", extendUITop.floatValue);
+                            extendUIBottom.floatValue = EditorGUILayout.FloatField("Bottom", extendUIBottom.floatValue);
+                            extendUILeft.floatValue = EditorGUILayout.FloatField("Left", extendUILeft.floatValue);
+                            extendUIRight.floatValue = EditorGUILayout.FloatField("Right", extendUIRight.floatValue);
+                        }
                     }
                 }
                 if (checkScope.changed)

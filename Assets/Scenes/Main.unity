@@ -173,7 +173,15 @@ MonoBehaviour:
   autoShowError: 0
   autoShowException: 0
   commandLog: 1
-  keys: 1a010000
+  toggleConsoleKeys: 1a010000
+  togglePreviewKeys: 1b010000
+  previewAnchorPosition: 8
+  previewSize: {x: 128, y: 96}
+  extendUI:
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
 --- !u!4 &1058137233
 Transform:
   m_ObjectHideFlags: 0

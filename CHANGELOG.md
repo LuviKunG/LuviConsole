@@ -4,7 +4,17 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v2.7.6 May 1st 2023 - Latest
+### v3.0.0 May 31st 2023 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#3.0.0`
+
+- Add new preview window for showing types and amount of logs.
+- Add options to toggle show/hide preview window.
+- Add options to change preview window anchored position.
+- Add options to adjust preview window size.
+- Redesign the **LuviConsole** editor inspector to separate configure between console window and preview window.
+
+### v2.7.6 May 1st 2023
 
 `https://github.com/LuviKunG/LuviConsole.git#2.7.6`
 
