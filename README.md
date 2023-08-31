@@ -109,7 +109,7 @@ https://github.com/LuviKunG/LuviConsole.git#upm
 ```
 https://github.com/LuviKunG/LuviConsole.git#(put the version number tag)
 ...
-https://github.com/LuviKunG/LuviConsole.git#3.0.0
+https://github.com/LuviKunG/LuviConsole.git#3.0.1
 https://github.com/LuviKunG/LuviConsole.git#2.7.6
 https://github.com/LuviKunG/LuviConsole.git#2.7.5
 ```

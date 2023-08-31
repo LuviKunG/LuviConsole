@@ -287,7 +287,7 @@ namespace LuviKunG.Console
             UpdateInput();
             if (isShowingConsole)
             {
-                UpdateScrollDrag();
+                UpdateConsoleScrollDrag();
             }
         }
 
@@ -322,66 +322,85 @@ namespace LuviKunG.Console
 
         private void UpdateInput()
         {
-#if UNITY_ANDROID || UNITY_IOS
-            if (Input.GetMouseButtonDown(0))
-            {
-                _swipePosStart = Input.mousePosition;
-            }
-            if (Input.GetMouseButton(0) && _swipePosStart != Vector3.zero)
-            {
-                _swipePosMoving = Input.mousePosition;
-                Vector3 direction = _swipePosMoving - _swipePosStart;
-                if (Vector3.Distance(_swipePosStart, _swipePosMoving) > (Screen.height * swipeRatio))
-                {
-                    if (Mathf.Abs(direction.x) <= Mathf.Abs(direction.y))
-                    {
-                        if (direction.y > 0)
-                        {
-                            _swipePosStart = Vector3.zero;
-                            _swipePosMoving = Vector3.zero;
-                            isShowing = true;
-                        }
-                        else
-                        {
-                            _swipePosStart = Vector3.zero;
-                            _swipePosMoving = Vector3.zero;
-						    isShowing = false;
-                        }
-                    }
-                }
-            }
-#else
+#if UNITY_EDITOR
             if (toggleConsoleKeys != null && toggleConsoleKeys.Length > 0)
             {
-                bool isToggleConsole = true;
+                bool isToggled = true;
                 for (int i = 0; i < toggleConsoleKeys.Length - 1; ++i)
                 {
                     if (!Input.GetKey(toggleConsoleKeys[i]))
                     {
-                        isToggleConsole = false;
+                        isToggled = false;
                         return;
                     }
                 }
-                if (isToggleConsole && Input.GetKeyDown(toggleConsoleKeys[toggleConsoleKeys.Length - 1]))
+                if (isToggled && Input.GetKeyDown(toggleConsoleKeys[^1]))
                 {
-                    ToggleConsole();
+                    isShowingConsole = !isShowingConsole;
                     GUI.FocusControl("commandfield");
                 }
             }
             if (togglePreviewKeys != null && togglePreviewKeys.Length > 0)
             {
-                bool isTogglePreview = true;
+                bool isToggled = true;
                 for (int i = 0; i < togglePreviewKeys.Length - 1; ++i)
                 {
                     if (!Input.GetKey(togglePreviewKeys[i]))
                     {
-                        isTogglePreview = false;
+                        isToggled = false;
                         return;
                     }
                 }
-                if (isTogglePreview && Input.GetKeyDown(togglePreviewKeys[togglePreviewKeys.Length - 1]))
+                if (isToggled && Input.GetKeyDown(togglePreviewKeys[^1]))
                 {
-                    TogglePreview();
+                    isShowingPreview = !isShowingPreview;
+                }
+            }
+#elif UNITY_ANDROID || UNITY_IOS
+            Touch touch0 = Input.GetTouch(0);
+            if (touch0.phase == TouchPhase.Began)
+            {
+                touchSwipePosStart = touch0.position;
+            }
+            else if (touch0.phase == TouchPhase.Moved)
+            {
+                touchSwipePosMoving = touch0.position;
+                float screenDivision = Screen.width / 2;
+                bool isShowConsole = touchSwipePosStart.x < screenDivision;
+                bool isShowPreview = touchSwipePosStart.x > screenDivision;
+                Vector3 direction = touchSwipePosMoving - touchSwipePosStart;
+                if (Vector3.Distance(touchSwipePosStart, touchSwipePosMoving) > (Screen.height * swipeRatio))
+                {
+                    if (isShowConsole && Mathf.Abs(direction.x) >= Mathf.Abs(direction.y))
+                    {
+                        if (direction.x > 0)
+                        {
+                            touchSwipePosStart = Vector3.zero;
+                            touchSwipePosMoving = Vector3.zero;
+                            isShowingConsole = true;
+                        }
+                        else
+                        {
+                            touchSwipePosStart = Vector3.zero;
+                            touchSwipePosMoving = Vector3.zero;
+                            isShowingConsole = false;
+                        }
+                    }
+                    if (isShowPreview && Mathf.Abs(direction.x) >= Mathf.Abs(direction.y))
+                    {
+                        if (direction.x < 0)
+                        {
+                            touchSwipePosStart = Vector3.zero;
+                            touchSwipePosMoving = Vector3.zero;
+                            isShowingPreview = true;
+                        }
+                        else
+                        {
+                            touchSwipePosStart = Vector3.zero;
+                            touchSwipePosMoving = Vector3.zero;
+                            isShowingPreview = false;
+                        }
+                    }
                 }
             }
 #endif
@@ -396,7 +415,7 @@ namespace LuviKunG.Console
             }
         }
 
-        private void UpdateScrollDrag()
+        private void UpdateConsoleScrollDrag()
         {
             Vector2 currentPosition = Input.mousePosition;
             // Bacause Input.mousePosition is start at bottom-left, so we need to convert into the same as Rect that start at top-left.
@@ -455,8 +474,8 @@ namespace LuviKunG.Console
         private int countLogError;
         private int countLogException;
 #if UNITY_ANDROID || UNITY_IOS
-        private Vector3 _swipePosStart = Vector3.zero;
-        private Vector3 _swipePosMoving = Vector3.zero;
+        private Vector3 touchSwipePosStart = Vector3.zero;
+        private Vector3 touchSwipePosMoving = Vector3.zero;
 #endif
 
         /// <summary>
@@ -597,16 +616,6 @@ namespace LuviKunG.Console
             countLogWarning = 0;
             countLogError = 0;
             countLogException = 0;
-        }
-
-        private void ToggleConsole()
-        {
-            isShowingConsole = !isShowingConsole;
-        }
-
-        private void TogglePreview()
-        {
-            isShowingPreview = !isShowingPreview;
         }
 
         private void ScrollLogToBottom()
