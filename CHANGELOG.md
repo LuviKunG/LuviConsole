@@ -1,5 +1,16 @@
 # Change Log
 
+## 3.0.1
+
+- Fix script syntax error on Android & iOS.
+  - Parameter named `isShowing` aren't renamed to `isShowingConsole`.
+- Change the swipe check algorithm.
+  - Change from using mouse of `Input.GetKeyDown(0)` to use `Touch touch0 = Input.GetTouch(0)` and get `touch0.phase` instead.
+  - Change from using `Input.mousePostion` to use `touch0.position` instead.
+- Implementation the toggle on touch screen device by separate the swipe left or right side of the screen.
+  - Swipe from the left side of the screen to toggle **Console Window**.
+  - Swipe from the right side of the screen to toggle **Preview Window**.
+
 ## 3.0.0
 
 - Add new preview window for showing types and amount of logs.

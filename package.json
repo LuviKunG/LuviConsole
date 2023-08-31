@@ -2,8 +2,8 @@
   "name": "com.luvikung.luviconsole",
   "displayName": "LuviConsole",
   "description": "LuviConsole is a IMGUI console of Unity that include the custom command feature.",
-  "version": "3.0.0",
-  "unity": "2021.3",
+  "version": "3.0.1",
+  "unity": "2022.3",
   "author": "Thanut Panichyotai",
   "contributors": [
     {
