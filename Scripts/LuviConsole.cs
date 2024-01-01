@@ -11,16 +11,18 @@ namespace LuviKunG.Console
     [HelpURL("https://github.com/LuviKunG/LuviConsole")]
     public sealed class LuviConsole : MonoBehaviour
     {
+        private readonly static StringBuilder str = new();
+
         /// <summary>
         /// Preset of the commands for the console.
         /// </summary>
         private struct CommandPreset
         {
-            public string preset;
-            public string name;
-            public string description;
-            public string group;
-            public bool executeImmediately;
+            public readonly string preset;
+            public readonly string name;
+            public readonly string description;
+            public readonly string group;
+            public readonly bool executeImmediately;
 
             public CommandPreset(string preset, string name, string description, string group, bool executeImmediately)
             {
@@ -29,6 +31,69 @@ namespace LuviKunG.Console
                 this.description = description;
                 this.group = group;
                 this.executeImmediately = executeImmediately;
+            }
+        }
+
+        /// <summary>
+        /// Message that will display in the screen.
+        /// </summary>
+        private struct ScreenMessage
+        {
+            private static readonly StringBuilder str = new();
+
+            public readonly string message;
+            public float duration;
+            public readonly Color? color;
+            public readonly bool bold;
+            public readonly bool italic;
+
+            public ScreenMessage(string message, float duration)
+            {
+                this.message = message;
+                this.duration = duration;
+                this.color = null;
+                this.bold = false;
+                this.italic = false;
+            }
+
+            public ScreenMessage(string message, float duration, bool bold, bool italic)
+            {
+                this.message = message;
+                this.duration = duration;
+                this.color = null;
+                this.bold = bold;
+                this.italic = italic;
+            }
+
+            public ScreenMessage(string message, float duration, Color color)
+            {
+                this.message = message;
+                this.duration = duration;
+                this.color = color;
+                this.bold = false;
+                this.italic = false;
+            }
+
+            public ScreenMessage(string message, float duration, Color color, bool bold, bool italic)
+            {
+                this.message = message;
+                this.duration = duration;
+                this.color = color;
+                this.bold = bold;
+                this.italic = italic;
+            }
+
+            public override string ToString()
+            {
+                str.Clear();
+                str.Append(message);
+                if (color.HasValue)
+                    str.Color(color.Value);
+                if (bold)
+                    str.Bold();
+                if (italic)
+                    str.Italic();
+                return str.ToString();
             }
         }
 
@@ -245,6 +310,12 @@ namespace LuviKunG.Console
         public KeyCode[] togglePreviewKeys = new KeyCode[] { KeyCode.F2 };
 
         /// <summary>
+        /// Keys to toggle show/hide of the preview.
+        /// This value will available when using in Unity Editor and Unity using Target Build of WebGL.
+        /// </summary>
+        public KeyCode[] toggleScreenMessageKeys = new KeyCode[] { KeyCode.F3 };
+
+        /// <summary>
         /// Anchor of the preview.
         /// </summary>
         public TextAnchor previewAnchorPosition = TextAnchor.LowerRight;
@@ -253,6 +324,11 @@ namespace LuviKunG.Console
         /// Size of the preview window.
         /// </summary>
         public Vector2 previewSize = new Vector2(128f, 96f);
+
+        /// <summary>
+        /// Show screen message on awake.
+        /// </summary>
+        public bool showScreenMessageOnAwake = true;
 
         /// <summary>
         /// Extend the LuviConsole GUI window.
@@ -284,7 +360,9 @@ namespace LuviKunG.Console
 
         private void Update()
         {
+            float deltaTime = Time.deltaTime;
             UpdateInput();
+            UpdateScreenMessages(in deltaTime);
             if (isShowingConsole)
             {
                 UpdateConsoleScrollDrag();
@@ -293,10 +371,12 @@ namespace LuviKunG.Console
 
         private void OnGUI()
         {
+            const float SCREEN_MESSAGE_PADDING = 10.0f;
             GUI.skin = guiSkin;
             Rect safeArea = Screen.safeArea;
             Rect rectScreen = new Rect(safeArea.x, Screen.height - (safeArea.y + safeArea.height), safeArea.width, safeArea.height);
             Rect rectExtendUI = new Rect(rectScreen.x + extendUI.left, rectScreen.y + extendUI.top, rectScreen.width - extendUI.width, rectScreen.height - extendUI.height);
+            Rect rectScreenMessage = new Rect(rectExtendUI.x + SCREEN_MESSAGE_PADDING, rectExtendUI.y + SCREEN_MESSAGE_PADDING, rectExtendUI.width - SCREEN_MESSAGE_PADDING, rectExtendUI.height - SCREEN_MESSAGE_PADDING);
             if (isShowingConsole)
             {
                 UpdateConsoleUI(in rectExtendUI);
@@ -304,6 +384,10 @@ namespace LuviKunG.Console
             if (isShowingPreview)
             {
                 UpdatePreviewUI(in rectExtendUI);
+            }
+            if (isShowingScreenMessage)
+            {
+                UpdateScreenMessageUI(in rectScreenMessage);
             }
         }
 
@@ -316,6 +400,7 @@ namespace LuviKunG.Console
 
         private void Initialize()
         {
+            isShowingScreenMessage = showScreenMessageOnAwake;
             LoadGUISkin();
             DontDestroyOnLoad(gameObject);
         }
@@ -354,6 +439,22 @@ namespace LuviKunG.Console
                 if (isToggled && Input.GetKeyDown(togglePreviewKeys[^1]))
                 {
                     isShowingPreview = !isShowingPreview;
+                }
+            }
+            if (toggleScreenMessageKeys != null && toggleScreenMessageKeys.Length > 0)
+            {
+                bool isToggled = true;
+                for (int i = 0; i < toggleScreenMessageKeys.Length - 1; ++i)
+                {
+                    if (!Input.GetKey(toggleScreenMessageKeys[i]))
+                    {
+                        isToggled = false;
+                        return;
+                    }
+                }
+                if (isToggled && Input.GetKeyDown(toggleScreenMessageKeys[^1]))
+                {
+                    isShowingScreenMessage = !isShowingScreenMessage;
                 }
             }
 #elif UNITY_ANDROID || UNITY_IOS
@@ -458,10 +559,11 @@ namespace LuviKunG.Console
         private List<CommandPreset> commandPresets = new List<CommandPreset>();
         private List<string> log = new List<string>();
         private List<string> logExecuteCommands = new List<string>();
-        private StringBuilder str = new StringBuilder();
+        private List<ScreenMessage> screenMessages = new List<ScreenMessage>();
 
         private bool isShowingConsole;
         private bool isShowingPreview;
+        private bool isShowingScreenMessage;
         private bool isScrollDebugDragging = false;
         private string commandHelpText = string.Empty;
         private string command = string.Empty;
@@ -492,13 +594,76 @@ namespace LuviKunG.Console
         }
 
         /// <summary>
+        /// Log message into the screen message.
+        /// </summary>
+        /// <param name="message">Message to show.</param>
+        /// <param name="duration">Duration to show.</param>
+        public void LogScreen(string message, float duration)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            ScreenMessage screenMessage = new(message, duration);
+            LogScreen(ref screenMessage);
+        }
+
+        /// <summary>
+        /// Log message into the screen message.
+        /// </summary>
+        /// <param name="message">Message to show.</param>
+        /// <param name="duration">Duration to show.</param>
+        /// <param name="bold">Bold this message.</param>
+        /// <param name="italic">Italic this message.</param>
+        public void LogScreen(string message, float duration, bool bold, bool italic)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            ScreenMessage screenMessage = new(message, duration, bold, italic);
+            LogScreen(ref screenMessage);
+        }
+
+        /// <summary>
+        /// Log message into the screen message.
+        /// </summary>
+        /// <param name="message">Message to show.</param>
+        /// <param name="duration">Duration to show.</param>
+        /// <param name="color">Color of this message.</param>
+        public void LogScreen(string message, float duration, Color color)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            ScreenMessage screenMessage = new(message, duration, color);
+            LogScreen(ref screenMessage);
+        }
+
+        /// <summary>
+        /// Log message into the screen message.
+        /// </summary>
+        /// <param name="message">Message to show.</param>
+        /// <param name="duration">Duration to show.</param>
+        /// <param name="color">Color of this message.</param>
+        /// <param name="bold">Bold this message.</param>
+        /// <param name="italic">Italic this message.</param>
+        public void LogScreen(string message, float duration, Color color, bool bold, bool italic)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            ScreenMessage screenMessage = new(message, duration, color, bold, italic);
+            LogScreen(ref screenMessage);
+        }
+
+        private void LogScreen(ref ScreenMessage message)
+        {
+            screenMessages.Add(message);
+        }
+
+        /// <summary>
         /// Log the message into console.
         /// </summary>
         /// <param name="message">Message to log.</param>
         /// <param name="color">Color of this message.</param>
         public void Log(string message, Color color)
         {
-            if (string.IsNullOrEmpty(message))
+            if (string.IsNullOrWhiteSpace(message))
                 return;
             str.Clear();
             str.Append(message);
@@ -516,7 +681,7 @@ namespace LuviKunG.Console
         /// <param name="italic">Italic this message.</param>
         public void Log(string message, bool bold, bool italic)
         {
-            if (string.IsNullOrEmpty(message))
+            if (string.IsNullOrWhiteSpace(message))
                 return;
             str.Clear();
             str.Append(message);
@@ -538,7 +703,7 @@ namespace LuviKunG.Console
         /// <param name="italic">Italic this message.</param>
         public void Log(string message, Color color, bool bold, bool italic)
         {
-            if (string.IsNullOrEmpty(message))
+            if (string.IsNullOrWhiteSpace(message))
                 return;
             str.Clear();
             str.Append(message);
@@ -627,6 +792,22 @@ namespace LuviKunG.Console
         {
             while (log.Count > logCapacity)
                 log.RemoveAt(0);
+        }
+
+        private void UpdateScreenMessages(in float deltaTime)
+        {
+            for (int i = screenMessages.Count - 1; i >= 0; --i)
+            {
+                float duration = screenMessages[i].duration - deltaTime;
+                if (duration < 0.0f)
+                    screenMessages.RemoveAt(i);
+                else
+                {
+                    var screenMessage = screenMessages[i];
+                    screenMessage.duration = duration;
+                    screenMessages[i] = screenMessage;
+                }
+            }
         }
 
         private void UpdateConsoleUI(in Rect rect)
@@ -835,6 +1016,20 @@ namespace LuviKunG.Console
                         GUILayout.Label($"<color={color}><b>Exception:</b></color>", guiSkin.customStyles[6]);
                         GUILayout.FlexibleSpace();
                         GUILayout.Label($"<color={color}><b>{countLogException:N0}</b></color>", guiSkin.customStyles[6]);
+                    }
+                }
+            }
+        }
+
+        private void UpdateScreenMessageUI(in Rect rect)
+        {
+            using (var areaScope = new GUILayout.AreaScope(rect))
+            {
+                using (new GUILayout.VerticalScope())
+                {
+                    for (int i = 0; i < screenMessages.Count; ++i)
+                    {
+                        GUILayout.Label(screenMessages[i].ToString());
                     }
                 }
             }

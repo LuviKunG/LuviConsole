@@ -1,5 +1,12 @@
 # Change Log
 
+## 3.1.0
+
+- Add new feature of displaying log as 'Screen Message'.
+  - By using `console.LogScreen(string message, float duration);` to display the message on the screen with duration.
+  - Comes with various setting of the colors and style (bold and italic).
+  - Able to set showing the screen messages on awake.
+
 ## 3.0.1
 
 - Fix script syntax error on Android & iOS.
