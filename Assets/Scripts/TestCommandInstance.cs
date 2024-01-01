@@ -61,6 +61,17 @@ public class TestCommandInstance : MonoBehaviour
         console.Log("This is custom log with color and bold", Color.blue, true, false);
         console.Log("This is custom log with color and italic", Color.blue, false, true);
         console.Log("This is custom log with color and both of bold and italic", Color.blue, true, true);
+
+        // This is custom log for showing message in screen.
+        const float SCREEN_MESSAGE_DURATION = 5.0f;
+        console.LogScreen("This is screen message.", SCREEN_MESSAGE_DURATION);
+        console.LogScreen("This is screen message with color.", SCREEN_MESSAGE_DURATION, Color.blue);
+        console.LogScreen("This is screen message with bold.", SCREEN_MESSAGE_DURATION, true, false);
+        console.LogScreen("This is screen message with italic.", SCREEN_MESSAGE_DURATION, false, true);
+        console.LogScreen("This is screen message with both of bold and italic.", SCREEN_MESSAGE_DURATION, true, true);
+        console.LogScreen("This is screen message with color and bold.", SCREEN_MESSAGE_DURATION, Color.blue, true, false);
+        console.LogScreen("This is screen message with color and italic.", SCREEN_MESSAGE_DURATION, Color.blue, false, true);
+        console.LogScreen("This is screen message with color and both of bold and italic.", SCREEN_MESSAGE_DURATION, Color.blue, true, true);
     }
 
     private void Start()

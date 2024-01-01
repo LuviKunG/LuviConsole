@@ -4,7 +4,16 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v3.0.1 August 31st 2023 - Latest
+### v3.1.0 January 1st 2024 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#3.1.0`
+
+- Add new feature of displaying log as 'Screen Message'.
+  - By using `console.LogScreen(string message, float duration);` to display the message on the screen with duration.
+  - Comes with various setting of the colors and style (bold and italic).
+  - Able to set showing the screen messages on awake.
+
+### v3.0.1 August 31st 2023
 
 `https://github.com/LuviKunG/LuviConsole.git#3.0.1`
 

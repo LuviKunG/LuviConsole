@@ -8,7 +8,7 @@ namespace LuviKunG.Console.Editor
     [CustomEditor(typeof(LuviConsole))]
     public sealed class LuviConsoleEditor : UnityEditor.Editor
     {
-        private const string LABEL_VERSION = "LuviConsole Version 3.0.0";
+        private const string LABEL_VERSION = "LuviConsole Version 3.1.0";
         private const string WARNING_ASSIGN_KEY = "Please assign key.";
 
         private readonly GUIContent contentLogCapacity = new GUIContent("Log Capacity", "The capacity of list that will show debug log on console window.");
@@ -23,10 +23,12 @@ namespace LuviKunG.Console.Editor
         private readonly GUIContent contentCommandLog = new GUIContent("Log Command", "Log the command after you executed.");
         private readonly GUIContent contentToggleConsoleKeys = new GUIContent("Toggle Console Keys", "Keys to toggle open and close of the console.");
         private readonly GUIContent contentTogglePreviewKeys = new GUIContent("Toggle Preview Keys", "Keys to toggle open and close of the preview.");
+        private readonly GUIContent contentToggleScreenMessageKeys = new GUIContent("Toggle Screen Message Keys", "Keys to toggle open and close of the screen message.");
         private readonly GUIContent contentPreviewAnchorPosition = new GUIContent("Preview Anchor Position", "Define anchor position of preview window.");
         private readonly GUIContent contentPreviewSize = new GUIContent("Preview Size", "Define size of preview window.");
         private readonly GUIContent contentSettingsConsole = new GUIContent("Console settings", "Settings of console.");
         private readonly GUIContent contentSettingsPreview = new GUIContent("Preview settings", "Settings of preview.");
+        private readonly GUIContent contentSettingsScreenMessage = new GUIContent("Screen Message settings", "Settings of screen message.");
         private readonly GUIContent contentExtendUI = new GUIContent("Extend UI", "Control extend size of UI of the GUI.");
 
         private LuviConsole console;
@@ -42,8 +44,10 @@ namespace LuviKunG.Console.Editor
         private SerializedProperty commandLog;
         private SerializedProperty toggleConsoleKeys;
         private SerializedProperty togglePreviewKeys;
+        private SerializedProperty toggleScreenMessageKeys;
         private SerializedProperty previewAnchorPosition;
         private SerializedProperty previewSize;
+        private SerializedProperty showScreenMessageOnAwake;
         private SerializedProperty extendUI;
         private SerializedProperty extendUITop;
         private SerializedProperty extendUIBottom;
@@ -52,9 +56,11 @@ namespace LuviKunG.Console.Editor
 
         private ReorderableList reorderListConsoleKeys;
         private ReorderableList reorderListPreviewKeys;
+        private ReorderableList reorderListScreenMessageKeys;
 
-        private bool isShowSettingConsole;
-        private bool isShowSettingPreview;
+        private bool isShowSettingsConsole;
+        private bool isShowSettingsPreview;
+        private bool isShowSettingsScreenMessage;
         private bool isShowExtendUI;
 
 #if UNITY_ANDROID || UNITY_IOS
@@ -76,8 +82,10 @@ namespace LuviKunG.Console.Editor
             commandLog = serializedObject.FindProperty(nameof(console.commandLog));
             toggleConsoleKeys = serializedObject.FindProperty(nameof(console.toggleConsoleKeys));
             togglePreviewKeys = serializedObject.FindProperty(nameof(console.togglePreviewKeys));
+            toggleScreenMessageKeys = serializedObject.FindProperty(nameof(console.toggleScreenMessageKeys));
             previewAnchorPosition = serializedObject.FindProperty(nameof(console.previewAnchorPosition));
             previewSize = serializedObject.FindProperty(nameof(console.previewSize));
+            showScreenMessageOnAwake = serializedObject.FindProperty(nameof(console.showScreenMessageOnAwake));
             extendUI = serializedObject.FindProperty(nameof(console.extendUI));
             extendUITop = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.top));
             extendUIBottom = extendUI.FindPropertyRelative(nameof(LuviConsole.Extend2D.bottom));
@@ -182,6 +190,55 @@ namespace LuviKunG.Console.Editor
                     property.serializedObject.ApplyModifiedProperties();
                 };
             }
+            if (reorderListScreenMessageKeys == null)
+            {
+                reorderListScreenMessageKeys = new ReorderableList(serializedObject, toggleScreenMessageKeys, true, true, true, true);
+                reorderListScreenMessageKeys.drawHeaderCallback = (rect) =>
+                {
+                    GUI.Label(rect, contentToggleScreenMessageKeys);
+                };
+                reorderListScreenMessageKeys.elementHeightCallback = (index) =>
+                {
+                    return EditorGUIUtility.singleLineHeight;
+                };
+                reorderListScreenMessageKeys.drawElementCallback = (rect, index, isActive, isFocus) =>
+                {
+                    var property = reorderListScreenMessageKeys.serializedProperty;
+                    var sp = property.GetArrayElementAtIndex(index);
+                    using (var changeScope = new EditorGUI.ChangeCheckScope())
+                    {
+                        sp.intValue = (int)(KeyCode)EditorGUI.EnumPopup(rect, (KeyCode)sp.intValue);
+                        if (changeScope.changed)
+                        {
+                            property.serializedObject.ApplyModifiedProperties();
+                        }
+                    }
+                };
+                reorderListScreenMessageKeys.drawNoneElementCallback = (rect) =>
+                {
+                    EditorGUI.HelpBox(rect, WARNING_ASSIGN_KEY, MessageType.Error);
+                };
+                reorderListScreenMessageKeys.onReorderCallback = (list) =>
+                {
+                    var property = list.serializedProperty;
+                    property.serializedObject.ApplyModifiedProperties();
+                };
+                reorderListScreenMessageKeys.onAddCallback = (list) =>
+                {
+                    var property = list.serializedProperty;
+                    property.InsertArrayElementAtIndex(property.arraySize);
+                    var sp = property.GetArrayElementAtIndex(property.arraySize - 1);
+                    sp.intValue = (int)KeyCode.None;
+                    property.serializedObject.ApplyModifiedProperties();
+                };
+                reorderListScreenMessageKeys.onRemoveCallback = (list) =>
+                {
+                    var property = list.serializedProperty;
+                    var index = list.selectedIndices.Count > 0 ? list.selectedIndices[0] : property.arraySize - 1;
+                    property.DeleteArrayElementAtIndex(index);
+                    property.serializedObject.ApplyModifiedProperties();
+                };
+            }
         }
 
         public override void OnInspectorGUI()
@@ -224,8 +281,8 @@ namespace LuviKunG.Console.Editor
                 autoShowError.boolValue = EditorGUILayout.Toggle(contentAutoShowError, autoShowError.boolValue);
                 autoShowException.boolValue = EditorGUILayout.Toggle(contentAutoShowException, autoShowException.boolValue);
                 commandLog.boolValue = EditorGUILayout.Toggle(contentCommandLog, commandLog.boolValue);
-                isShowSettingConsole = EditorGUILayout.Foldout(isShowSettingConsole, contentSettingsConsole);
-                if (isShowSettingConsole)
+                isShowSettingsConsole = EditorGUILayout.Foldout(isShowSettingsConsole, contentSettingsConsole);
+                if (isShowSettingsConsole)
                 {
                     using (new EditorGUI.IndentLevelScope())
                     {
@@ -268,8 +325,8 @@ namespace LuviKunG.Console.Editor
                         }
                     }
                 }
-                isShowSettingPreview = EditorGUILayout.Foldout(isShowSettingPreview, contentSettingsPreview);
-                if (isShowSettingPreview)
+                isShowSettingsPreview = EditorGUILayout.Foldout(isShowSettingsPreview, contentSettingsPreview);
+                if (isShowSettingsPreview)
                 {
                     using (new EditorGUI.IndentLevelScope())
                     {
@@ -311,6 +368,50 @@ namespace LuviKunG.Console.Editor
                         }
                         previewAnchorPosition.intValue = (int)(TextAnchor)EditorGUILayout.EnumPopup(contentPreviewAnchorPosition, (TextAnchor)previewAnchorPosition.intValue);
                         previewSize.vector2Value = EditorGUILayout.Vector2Field(contentPreviewSize, previewSize.vector2Value);
+                    }
+                }
+                isShowSettingsScreenMessage = EditorGUILayout.Foldout(isShowSettingsScreenMessage, contentSettingsScreenMessage);
+                if (isShowSettingsScreenMessage)
+                {
+                    using (new EditorGUI.IndentLevelScope())
+                    {
+                        reorderListScreenMessageKeys.DoLayoutList();
+                        using (new EditorGUILayout.VerticalScope())
+                        {
+                            bool wasContainNone = false;
+                            bool wasSameValue = false;
+                            for (int i = 0; i < toggleScreenMessageKeys.arraySize; ++i)
+                            {
+                                var sp = toggleScreenMessageKeys.GetArrayElementAtIndex(i);
+                                if (sp.intValue == (int)KeyCode.None)
+                                {
+                                    wasContainNone = true;
+                                    break;
+                                }
+                                for (int j = 0; j < toggleScreenMessageKeys.arraySize; ++j)
+                                {
+                                    if (i == j)
+                                        continue;
+                                    var spr = toggleScreenMessageKeys.GetArrayElementAtIndex(j);
+                                    if (sp.intValue == spr.intValue)
+                                    {
+                                        wasSameValue = true;
+                                        break;
+                                    }
+                                }
+                                if (wasSameValue)
+                                    break;
+                            }
+                            if (wasContainNone)
+                            {
+                                EditorGUILayout.HelpBox($"Keys cannot contains key code of none.", MessageType.Error, true);
+                            }
+                            if (wasSameValue)
+                            {
+                                EditorGUILayout.HelpBox($"Keys should not have the same multiple value.", MessageType.Error, true);
+                            }
+                        }
+                        showScreenMessageOnAwake.boolValue = EditorGUILayout.Toggle("Show Screen Message On Awake", showScreenMessageOnAwake.boolValue);
                     }
                 }
                 isShowExtendUI = EditorGUILayout.Foldout(isShowExtendUI, contentExtendUI);

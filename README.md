@@ -3,6 +3,14 @@ LuviConsole is a console IMGUI of Unity that able to show every log that perform
 
 ![LuviConsole IMGUI Instance](images/image01.gif)
 
+In the version of 3.0.0 comes up with the counter of logs types and preview in the mini panel. You can adjust the size of the box too.
+
+![LuviConsole IMGUI Instance](images/image02.gif)
+
+In the version of 3.1.0 comes up with the screen messages.
+
+![LuviConsole IMGUI Instance](images/image03.gif)
+
 ## How to use?
 
 There are two different way to use.
@@ -77,6 +85,17 @@ public class TestCommandInstance : MonoBehaviour
         console.Log("This is custom log with color and italic", Color.blue, false, true);
         console.Log("This is custom log with color and both of bold and italic", Color.blue, true, true);
 
+        // This is custom log for showing message in screen.
+        const float SCREEN_MESSAGE_DURATION = 5.0f;
+        console.LogScreen("This is screen message.", SCREEN_MESSAGE_DURATION);
+        console.LogScreen("This is screen message with color.", SCREEN_MESSAGE_DURATION, Color.blue);
+        console.LogScreen("This is screen message with bold.", SCREEN_MESSAGE_DURATION, true, false);
+        console.LogScreen("This is screen message with italic.", SCREEN_MESSAGE_DURATION, false, true);
+        console.LogScreen("This is screen message with both of bold and italic.", SCREEN_MESSAGE_DURATION, true, true);
+        console.LogScreen("This is screen message with color and bold.", SCREEN_MESSAGE_DURATION, Color.blue, true, false);
+        console.LogScreen("This is screen message with color and italic.", SCREEN_MESSAGE_DURATION, Color.blue, false, true);
+        console.LogScreen("This is screen message with color and both of bold and italic.", SCREEN_MESSAGE_DURATION, Color.blue, true, true);
+
         // Execute the command by command string (in runtime).
         console.ExecuteCommand("/foo");
         console.ExecuteCommand("/test Arg1 Arg2 Arg3 Arg4 Arg5");
@@ -109,9 +128,9 @@ https://github.com/LuviKunG/LuviConsole.git#upm
 ```
 https://github.com/LuviKunG/LuviConsole.git#(put the version number tag)
 ...
+https://github.com/LuviKunG/LuviConsole.git#3.1.0
 https://github.com/LuviKunG/LuviConsole.git#3.0.1
 https://github.com/LuviKunG/LuviConsole.git#2.7.6
-https://github.com/LuviKunG/LuviConsole.git#2.7.5
 ```
 
 You can check the different version by taking a look at [CHANGELOG](/CHANGELOG.md)
