@@ -7,7 +7,7 @@ namespace LuviKunG.Console
 {
     using Extension;
 
-    [AddComponentMenu("LuviKunG/LuviConsole")]
+    [AddComponentMenu("LuviKunG/Luvi Console")]
     [HelpURL("https://github.com/LuviKunG/LuviConsole")]
     public sealed class LuviConsole : MonoBehaviour
     {
@@ -29,124 +29,6 @@ namespace LuviKunG.Console
                 this.description = description;
                 this.group = group;
                 this.executeImmediately = executeImmediately;
-            }
-        }
-
-        [Serializable]
-        public struct Extend2D
-        {
-            public float top;
-            public float bottom;
-            public float left;
-            public float right;
-
-            public float width => left + right;
-            public float height => top + bottom;
-
-            public Extend2D(float top, float bottom, float left, float right)
-            {
-                this.top = top;
-                this.bottom = bottom;
-                this.left = left;
-                this.right = right;
-            }
-
-            public Extend2D(float vertical, float horizontal)
-            {
-                this.top = vertical;
-                this.bottom = vertical;
-                this.left = horizontal;
-                this.right = horizontal;
-            }
-
-            public Extend2D(float all)
-            {
-                this.top = all;
-                this.bottom = all;
-                this.left = all;
-                this.right = all;
-            }
-
-            public static Extend2D operator +(Extend2D a, Extend2D b)
-            {
-                return new Extend2D(a.top + b.top, a.bottom + b.bottom, a.left + b.left, a.right + b.right);
-            }
-
-            public static Extend2D operator -(Extend2D a, Extend2D b)
-            {
-                return new Extend2D(a.top - b.top, a.bottom - b.bottom, a.left - b.left, a.right - b.right);
-            }
-
-            public static Extend2D operator *(Extend2D a, Extend2D b)
-            {
-                return new Extend2D(a.top * b.top, a.bottom * b.bottom, a.left * b.left, a.right * b.right);
-            }
-
-            public static Extend2D operator /(Extend2D a, Extend2D b)
-            {
-                return new Extend2D(a.top / b.top, a.bottom / b.bottom, a.left / b.left, a.right / b.right);
-            }
-
-            public static Extend2D operator +(Extend2D a, float b)
-            {
-                return new Extend2D(a.top + b, a.bottom + b, a.left + b, a.right + b);
-            }
-
-            public static Extend2D operator -(Extend2D a, float b)
-            {
-                return new Extend2D(a.top - b, a.bottom - b, a.left - b, a.right - b);
-            }
-
-            public static Extend2D operator *(Extend2D a, float b)
-            {
-                return new Extend2D(a.top * b, a.bottom * b, a.left * b, a.right * b);
-            }
-
-            public static Extend2D operator /(Extend2D a, float b)
-            {
-                return new Extend2D(a.top / b, a.bottom / b, a.left / b, a.right / b);
-            }
-
-            public static Extend2D operator +(float a, Extend2D b)
-            {
-                return new Extend2D(a + b.top, a + b.bottom, a + b.left, a + b.right);
-            }
-
-            public static Extend2D operator -(float a, Extend2D b)
-            {
-                return new Extend2D(a - b.top, a - b.bottom, a - b.left, a - b.right);
-            }
-
-            public static Extend2D operator *(float a, Extend2D b)
-            {
-                return new Extend2D(a * b.top, a * b.bottom, a * b.left, a * b.right);
-            }
-
-            public static Extend2D operator /(float a, Extend2D b)
-            {
-                return new Extend2D(a / b.top, a / b.bottom, a / b.left, a / b.right);
-            }
-
-            public static bool operator ==(Extend2D a, Extend2D b)
-            {
-                return a.top == b.top && a.bottom == b.bottom && a.left == b.left && a.right == b.right;
-            }
-
-            public static bool operator !=(Extend2D a, Extend2D b)
-            {
-                return a.top != b.top || a.bottom != b.bottom || a.left != b.left || a.right != b.right;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj is Extend2D other)
-                    return top == other.top && bottom == other.bottom && left == other.left && right == other.right;
-                return false;
-            }
-
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
             }
         }
 
@@ -239,22 +121,6 @@ namespace LuviKunG.Console
         public KeyCode[] toggleConsoleKeys = new KeyCode[] { KeyCode.F1 };
 
         /// <summary>
-        /// Keys to toggle show/hide of the preview.
-        /// This value will available when using in Unity Editor and Unity using Target Build of WebGL.
-        /// </summary>
-        public KeyCode[] togglePreviewKeys = new KeyCode[] { KeyCode.F2 };
-
-        /// <summary>
-        /// Anchor of the preview.
-        /// </summary>
-        public TextAnchor previewAnchorPosition = TextAnchor.LowerRight;
-
-        /// <summary>
-        /// Size of the preview window.
-        /// </summary>
-        public Vector2 previewSize = new Vector2(128f, 96f);
-
-        /// <summary>
         /// Extend the LuviConsole GUI window.
         /// </summary>
         public Extend2D extendUI = new Extend2D(0);
@@ -301,10 +167,6 @@ namespace LuviKunG.Console
             {
                 UpdateConsoleUI(in rectExtendUI);
             }
-            if (isShowingPreview)
-            {
-                UpdatePreviewUI(in rectExtendUI);
-            }
         }
 
 #if UNITY_EDITOR
@@ -340,22 +202,6 @@ namespace LuviKunG.Console
                     GUI.FocusControl("commandfield");
                 }
             }
-            if (togglePreviewKeys != null && togglePreviewKeys.Length > 0)
-            {
-                bool isToggled = true;
-                for (int i = 0; i < togglePreviewKeys.Length - 1; ++i)
-                {
-                    if (!Input.GetKey(togglePreviewKeys[i]))
-                    {
-                        isToggled = false;
-                        return;
-                    }
-                }
-                if (isToggled && Input.GetKeyDown(togglePreviewKeys[^1]))
-                {
-                    isShowingPreview = !isShowingPreview;
-                }
-            }
 #elif UNITY_ANDROID || UNITY_IOS
             Touch touch0 = Input.GetTouch(0);
             if (touch0.phase == TouchPhase.Began)
@@ -384,21 +230,6 @@ namespace LuviKunG.Console
                             touchSwipePosStart = Vector3.zero;
                             touchSwipePosMoving = Vector3.zero;
                             isShowingConsole = false;
-                        }
-                    }
-                    if (isShowPreview && Mathf.Abs(direction.x) >= Mathf.Abs(direction.y))
-                    {
-                        if (direction.x < 0)
-                        {
-                            touchSwipePosStart = Vector3.zero;
-                            touchSwipePosMoving = Vector3.zero;
-                            isShowingPreview = true;
-                        }
-                        else
-                        {
-                            touchSwipePosStart = Vector3.zero;
-                            touchSwipePosMoving = Vector3.zero;
-                            isShowingPreview = false;
                         }
                     }
                 }
@@ -449,19 +280,17 @@ namespace LuviKunG.Console
         private Rect rectCommandInput;
         private Rect rectCommandHelpBox;
         private Rect rectCommandReturn;
-        private Rect rectPreviewWindow;
         private Vector2 scrollDebugPosition = Vector2.zero;
         private Vector2 scrollCommandPosition = Vector2.zero;
         private Vector2 scrollDebugDragPosition = Vector2.zero;
         private Vector2 scrollCommandDragPosition = Vector2.zero;
-        private Dictionary<string, LuviCommandExecution> commandData = new Dictionary<string, LuviCommandExecution>();
+        private Dictionary<string, LuviCommandExecutionDelegate> commandData = new Dictionary<string, LuviCommandExecutionDelegate>();
         private List<CommandPreset> commandPresets = new List<CommandPreset>();
         private List<string> log = new List<string>();
         private List<string> logExecuteCommands = new List<string>();
         private StringBuilder str = new StringBuilder();
 
         private bool isShowingConsole;
-        private bool isShowingPreview;
         private bool isScrollDebugDragging = false;
         private string commandHelpText = string.Empty;
         private string command = string.Empty;
@@ -469,10 +298,6 @@ namespace LuviKunG.Console
         private int logExecutePosition;
         private int indexConsole;
         private int indexDebug;
-        private int countLogVerbose;
-        private int countLogWarning;
-        private int countLogError;
-        private int countLogException;
 #if UNITY_ANDROID || UNITY_IOS
         private Vector3 touchSwipePosStart = Vector3.zero;
         private Vector3 touchSwipePosMoving = Vector3.zero;
@@ -566,7 +391,6 @@ namespace LuviKunG.Console
                         Log(str.ToString());
                         if (autoShowWarning & !isShowingConsole)
                             isShowingConsole = true;
-                        countLogWarning++;
                     }
                     break;
                 case LogType.Error:
@@ -579,7 +403,6 @@ namespace LuviKunG.Console
                         Log(str.ToString());
                         if (autoShowError & !isShowingConsole)
                             isShowingConsole = true;
-                        countLogError++;
                     }
                     break;
                 case LogType.Exception:
@@ -594,13 +417,11 @@ namespace LuviKunG.Console
                         Log(str.ToString());
                         if (autoShowException & !isShowingConsole)
                             isShowingConsole = true;
-                        countLogException++;
                     }
                     break;
                 default:
                     {
                         Log(message);
-                        countLogVerbose++;
                     }
                     break;
             }
@@ -612,10 +433,6 @@ namespace LuviKunG.Console
         public void ClearLogs()
         {
             log.Clear();
-            countLogVerbose = 0;
-            countLogWarning = 0;
-            countLogError = 0;
-            countLogException = 0;
         }
 
         private void ScrollLogToBottom()
@@ -634,8 +451,9 @@ namespace LuviKunG.Console
             if (rect.width > rect.height)
             {
                 //Landscape
-                Rect rectLeft = new Rect(rect.x, rect.y, rect.width / 2, rect.height);
-                Rect rectRight = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, rect.height);
+                float halfWidth = rect.width / 2;
+                Rect rectLeft = new Rect(rect.x, rect.y, Mathf.Floor(halfWidth), rect.height);
+                Rect rectRight = new Rect(rect.x + Mathf.Floor(halfWidth), rect.y, Mathf.Ceil(halfWidth), rect.height);
                 rectDebugLogBackground = new Rect(rectLeft.x, rectLeft.y, rectLeft.width, rectLeft.height - 64);
                 rectDebugLogScroll = new Rect(rectLeft.x + 8, rectLeft.y + 24, rectLeft.width - 16, rectLeft.height - 96);
                 rectDebugLogScrollDrag = new Rect(rectLeft.x + 8, rectLeft.y + 24, rectLeft.width - 48, rectLeft.height - 96);
@@ -651,8 +469,9 @@ namespace LuviKunG.Console
             else
             {
                 //Portrait
-                Rect rectTop = new Rect(rect.x, rect.y, rect.width, rect.height / 2);
-                Rect rectBottom = new Rect(rect.x, rect.y + rect.height / 2, rect.width, rect.height / 2);
+                float halfHeight = rect.height / 2;
+                Rect rectTop = new Rect(rect.x, rect.y, rect.width, Mathf.Floor(halfHeight));
+                Rect rectBottom = new Rect(rect.x, rect.y + Mathf.Floor(halfHeight), rect.width, Mathf.Ceil(halfHeight));
                 rectDebugLogBackground = new Rect(rectTop.x, rectTop.y, rectTop.width, rectTop.height - 64);
                 rectDebugLogScroll = new Rect(rectTop.x + 8, rectTop.y + 24, rectTop.width - 16, rectTop.height - 96);
                 rectDebugLogScrollDrag = new Rect(rectTop.x + 8, rectTop.y + 24, rectTop.width - 48, rectTop.height - 96);
@@ -785,67 +604,12 @@ namespace LuviKunG.Console
             }
         }
 
-        private void UpdatePreviewUI(in Rect rect)
-        {
-            Rect GetRectByAnchor(in Rect rect, TextAnchor anchor, Vector2 size)
-            {
-                return anchor switch
-                {
-                    TextAnchor.UpperLeft => new Rect(rect.x, rect.y, size.x, size.y),
-                    TextAnchor.UpperCenter => new Rect(rect.x + (rect.width - size.x) / 2, rect.y, size.x, size.y),
-                    TextAnchor.UpperRight => new Rect(rect.x + rect.width - size.x, rect.y, size.x, size.y),
-                    TextAnchor.MiddleLeft => new Rect(rect.x, rect.y + (rect.height - size.y) / 2, size.x, size.y),
-                    TextAnchor.MiddleCenter => new Rect(rect.x + (rect.width - size.x) / 2, rect.y + (rect.height - size.y) / 2, size.x, size.y),
-                    TextAnchor.MiddleRight => new Rect(rect.x + rect.width - size.x, rect.y + (rect.height - size.y) / 2, size.x, size.y),
-                    TextAnchor.LowerLeft => new Rect(rect.x, rect.y + rect.height - size.y, size.x, size.y),
-                    TextAnchor.LowerCenter => new Rect(rect.x + (rect.width - size.x) / 2, rect.y + rect.height - size.y, size.x, size.y),
-                    TextAnchor.LowerRight => new Rect(rect.x + rect.width - size.x, rect.y + rect.height - size.y, size.x, size.y),
-                    _ => new Rect(0, 0, size.x, size.y),
-                };
-            }
-            rectPreviewWindow = GetRectByAnchor(in rect, previewAnchorPosition, previewSize);
-            using (var areaScope = new GUILayout.AreaScope(rectPreviewWindow, GUIContent.none, guiSkin.customStyles[5]))
-            {
-                using (new GUILayout.VerticalScope())
-                {
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        string color = $"#{ColorUtility.ToHtmlStringRGB(Color.white)}";
-                        GUILayout.Label($"<color={color}>Verbose:</color>", guiSkin.customStyles[6]);
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label($"<color={color}>{countLogVerbose:N0}</color>", guiSkin.customStyles[6]);
-                    }
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        string color = $"#{ColorUtility.ToHtmlStringRGB(Color.yellow)}";
-                        GUILayout.Label($"<color={color}>Warning:</color>", guiSkin.customStyles[6]);
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label($"<color={color}>{countLogWarning:N0}</color>", guiSkin.customStyles[6]);
-                    }
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        string color = $"#{ColorUtility.ToHtmlStringRGB(Color.red)}";
-                        GUILayout.Label($"<color={color}>Error:</color>", guiSkin.customStyles[6]);
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label($"<color={color}>{countLogError:N0}</color>", guiSkin.customStyles[6]);
-                    }
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        string color = $"#{ColorUtility.ToHtmlStringRGB(Color.red)}";
-                        GUILayout.Label($"<color={color}><b>Exception:</b></color>", guiSkin.customStyles[6]);
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label($"<color={color}><b>{countLogException:N0}</b></color>", guiSkin.customStyles[6]);
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Add new command for this console.
         /// </summary>
         /// <param name="prefix">Prefix of the command.</param>
         /// <param name="execution">Execution callback function.</param>
-        public void AddCommand(string prefix, LuviCommandExecution execution)
+        public void AddCommand(string prefix, LuviCommandExecutionDelegate execution)
         {
             if (string.IsNullOrWhiteSpace(prefix))
                 throw new ArgumentNullException("Prefix cannot be null or empty.");

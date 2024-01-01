@@ -7,5 +7,5 @@ namespace LuviKunG.Console
     /// Using in <see cref="LuviConsole"/> for calling callback function of the command execution.
     /// </summary>
     /// <param name="arguments">Available arguments. The first arguments is always command prefix.</param>
-    public delegate void LuviCommandExecution(IReadOnlyList<string> arguments);
+    public delegate void LuviCommandExecutionDelegate(IReadOnlyList<string> arguments);
 }
