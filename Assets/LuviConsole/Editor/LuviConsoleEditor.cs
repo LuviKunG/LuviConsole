@@ -8,7 +8,7 @@ namespace LuviKunG.Console.Editor
     [CustomEditor(typeof(LuviConsole))]
     public sealed class LuviConsoleEditor : UnityEditor.Editor
     {
-        private const string LABEL_VERSION = "LuviConsole Version 3.1.0";
+        private const string LABEL_VERSION = "LuviConsole Version 3.2.0";
         private const string WARNING_ASSIGN_KEY = "Please assign key.";
 
         private readonly GUIContent contentLogCapacity = new GUIContent("Log Capacity", "The capacity of list that will show debug log on console window.");
@@ -71,7 +71,7 @@ namespace LuviKunG.Console.Editor
         {
             console = (LuviConsole)target;
             logCapacity = serializedObject.FindProperty(nameof(console.logCapacity));
-            excuteCapacity = serializedObject.FindProperty(nameof(console.excuteCapacity));
+            excuteCapacity = serializedObject.FindProperty(nameof(console.executeCapacity));
 #if UNITY_ANDROID || UNITY_IOS
             swipeRatio = serializedObject.FindProperty(nameof(console.swipeRatio));
 #endif

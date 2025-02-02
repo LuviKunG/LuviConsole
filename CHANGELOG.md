@@ -4,7 +4,13 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v3.1.0 January 1st 2024 - Latest
+### v3.2.0 Febuary 2nd 2025 - Latest
+
+`https://github.com/LuviKunG/LuviConsole.git#3.2.0`
+
+- Refactor the code to be more readable and maintainable for Unity 6 and above.
+
+### v3.1.0 January 1st 2024
 
 `https://github.com/LuviKunG/LuviConsole.git#3.1.0`
 

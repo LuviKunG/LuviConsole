@@ -1,5 +1,9 @@
 # Change Log
 
+## 3.2.0
+
+- Refactor the code to be more readable and maintainable for Unity 6 and above.
+
 ## 3.1.0
 
 - Add new feature of displaying log as 'Screen Message'.
