@@ -1,5 +1,26 @@
 # Change Log
 
+## 4.0.0
+
+- **Breaking:** Requires Unity 6000.0 or newer and the **Input System** package (`com.unity.inputsystem`). Set **Active Input Handling** in Player Settings to **Input System Package (New)** or **Both**.
+- Rebuild the runtime UI with **UI Toolkit** instead of IMGUI.
+  - `UIDocument` and `PanelSettings` are created automatically at runtime. If the GameObject already has a `UIDocument` with `PanelSettings` assigned, it will use that instead.
+  - New default style at `Resources/LuviKunG/LuviConsoleStyle.uss`. Assign your own style sheet to the new **Style Sheet** field to replace it.
+  - Keep the layout switching between landscape (logs left, commands right) and portrait (logs top, commands bottom) when the screen aspect ratio changes.
+  - Log entries are recycled when the log capacity is reached.
+  - Drag the log panel to scroll with the mouse or touch.
+  - Remove `LuviConsoleGUI.guiskin` and the GUI textures. The `guiSkin` field is removed.
+- Replace the legacy Input Manager with the **Input System**.
+  - `toggleConsoleKeys`, `togglePreviewKeys` and `toggleScreenMessageKeys` (`KeyCode[]`) are replaced by `toggleConsoleAction`, `togglePreviewAction` and `toggleScreenMessageAction` (`InputAction`). Defaults are still F1, F2 and F3, and they can be bound to any control, including modifier composites and gamepad buttons.
+  - Toggle actions now work on every platform, not only in the editor.
+  - Swipe gestures now work on any device with a touch screen. Add `swipeToToggle` option to turn it off.
+- Add `IsShowingConsole`, `IsShowingPreview` and `IsShowingScreenMessage` properties.
+- Logs received from other threads are queued and displayed on the main thread. `Log()` is now safe to call from any thread.
+- Screen messages now count down with unscaled time, so they still disappear while the game is paused.
+- Command presets keep their insertion order inside the same group.
+- Fix `executeCapacity` value from older prefabs being lost after it was renamed from `excuteCapacity`.
+- Rebuild the **LuviConsole** inspector with UI Toolkit.
+
 ## 3.2.0
 
 - Refactor the code to be more readable and maintainable for Unity 6 and above.

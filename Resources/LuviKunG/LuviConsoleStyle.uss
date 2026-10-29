@@ -1,0 +1,285 @@
+/* LuviConsole default style sheet.
+ * Assign your own style sheet to LuviConsole's "Style Sheet" field to replace this one. */
+
+.luvi-console {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    font-size: 16px;
+    color: rgb(230, 233, 239);
+    -unity-font-definition: url("../../GUI/tahoma.ttf");
+}
+
+.luvi-console .unity-text-element {
+    -unity-font-definition: url("../../GUI/tahoma.ttf");
+}
+
+.luvi-console__safe-area {
+    position: absolute;
+}
+
+/* Console layout: landscape splits left/right, portrait splits top/bottom. */
+
+.luvi-console__console {
+    flex-grow: 1;
+    flex-direction: row;
+    padding: 6px;
+}
+
+.luvi-console__console--portrait {
+    flex-direction: column;
+}
+
+.luvi-console__pane {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    flex-direction: column;
+    margin: 4px;
+    min-width: 0;
+    min-height: 0;
+}
+
+.luvi-console__panel {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    padding: 8px 10px;
+    overflow: hidden;
+    background-color: rgba(14, 16, 22, 0.88);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.luvi-console__panel-header {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.luvi-console .luvi-console__panel-title {
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    letter-spacing: 2px;
+    -unity-font-style: bold;
+    color: rgb(61, 214, 245);
+}
+
+/* Logs */
+
+.luvi-console__log-scroll {
+    flex-grow: 1;
+}
+
+.luvi-console .luvi-console__log-entry {
+    margin: 0;
+    padding: 3px 2px;
+    white-space: normal;
+    -unity-text-align: upper-left;
+    border-bottom-width: 1px;
+    border-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Toolbars and buttons */
+
+.luvi-console__toolbar {
+    flex-direction: row;
+    flex-shrink: 0;
+    height: 56px;
+    margin: 0 -4px;
+}
+
+.luvi-console__toolbar--header {
+    margin-bottom: 8px;
+}
+
+.luvi-console__toolbar--footer {
+    margin-top: 8px;
+}
+
+.luvi-console__spacer {
+    flex-grow: 1;
+}
+
+.luvi-console .luvi-console__button {
+    min-width: 56px;
+    margin: 0 4px;
+    padding: 0 14px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: rgb(230, 233, 239);
+    background-color: rgba(34, 38, 50, 0.92);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+}
+
+.luvi-console .luvi-console__button:hover {
+    background-color: rgba(52, 58, 74, 0.95);
+    border-color: rgba(61, 214, 245, 0.6);
+}
+
+.luvi-console .luvi-console__button:active {
+    color: rgb(10, 12, 16);
+    background-color: rgb(61, 214, 245);
+    border-color: rgb(61, 214, 245);
+}
+
+.luvi-console .luvi-console__button:disabled {
+    opacity: 0.4;
+}
+
+.luvi-console .luvi-console__button--accent {
+    color: rgb(10, 12, 16);
+    background-color: rgba(61, 214, 245, 0.9);
+    border-color: rgb(61, 214, 245);
+}
+
+.luvi-console .luvi-console__button--accent:hover {
+    background-color: rgb(120, 228, 250);
+}
+
+/* Command input */
+
+.luvi-console .luvi-console__command-field {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin: 0 4px;
+}
+
+.luvi-console .luvi-console__command-field #unity-text-input {
+    padding: 0 14px;
+    font-size: 18px;
+    color: rgb(230, 233, 239);
+    -unity-text-align: middle-left;
+    background-color: rgba(14, 16, 22, 0.92);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+}
+
+.luvi-console .luvi-console__command-field:focus #unity-text-input {
+    border-color: rgb(61, 214, 245);
+}
+
+.luvi-console .luvi-console__command-field:disabled {
+    opacity: 0.5;
+}
+
+.luvi-console .luvi-console__command-help {
+    flex-shrink: 0;
+    min-height: 24px;
+    margin: 0 0 6px 0;
+    padding: 0 2px;
+    font-size: 14px;
+    white-space: normal;
+    -unity-font-style: italic;
+    color: rgba(230, 233, 239, 0.7);
+}
+
+/* Command presets */
+
+.luvi-console__preset-scroll {
+    flex-grow: 1;
+}
+
+.luvi-console .luvi-console__preset-group {
+    margin: 6px 0 2px 0;
+    padding: 8px 12px;
+    font-size: 18px;
+    white-space: normal;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    color: rgb(230, 233, 239);
+    background-color: rgba(255, 255, 255, 0.05);
+    border-width: 0;
+    border-left-width: 3px;
+    border-color: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+}
+
+.luvi-console .luvi-console__preset-group--expanded {
+    color: rgb(61, 214, 245);
+    border-color: rgb(61, 214, 245);
+}
+
+.luvi-console .luvi-console__preset {
+    margin: 2px 0 2px 14px;
+    padding: 8px 12px;
+    font-size: 16px;
+    white-space: normal;
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+}
+
+/* Preview */
+
+.luvi-console__preview-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    padding: 6px;
+}
+
+.luvi-console__preview {
+    justify-content: space-around;
+    padding: 4px 10px;
+    overflow: hidden;
+    background-color: rgba(14, 16, 22, 0.88);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.luvi-console__preview-row {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.luvi-console .luvi-console__preview-label {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    color: rgb(230, 233, 239);
+}
+
+.luvi-console .luvi-console__preview-row--warning > .luvi-console__preview-label {
+    color: rgb(255, 214, 10);
+}
+
+.luvi-console .luvi-console__preview-row--error > .luvi-console__preview-label {
+    color: rgb(255, 69, 58);
+}
+
+.luvi-console .luvi-console__preview-row--exception > .luvi-console__preview-label {
+    color: rgb(255, 69, 58);
+    -unity-font-style: bold;
+}
+
+/* Screen messages */
+
+.luvi-console__screen-messages {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    right: 0;
+    bottom: 0;
+}
+
+.luvi-console .luvi-console__screen-message {
+    margin: 0;
+    padding: 2px 0;
+    white-space: normal;
+    color: rgb(255, 255, 255);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.85);
+}

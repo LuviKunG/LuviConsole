@@ -1,7 +1,8 @@
 {
     "name": "LuviKunG.Console.Editor",
     "references": [
-        "LuviKunG.Console"
+        "LuviKunG.Console",
+        "Unity.InputSystem"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [
