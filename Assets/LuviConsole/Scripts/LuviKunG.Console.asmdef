@@ -1,3 +1,8 @@
-﻿{
-	"name": "LuviKunG.Console"
+{
+    "name": "LuviKunG.Console",
+    "rootNamespace": "LuviKunG.Console",
+    "references": [
+        "Unity.InputSystem"
+    ],
+    "autoReferenced": true
 }

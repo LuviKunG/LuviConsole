@@ -160,8 +160,9 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f19fa7680e35b974281e02967799f89a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  guiSkin: {fileID: 11400000, guid: 86ab23dcee2204e42b413c0cececf64f, type: 2}
+  m_EditorClassIdentifier: LuviKunG.Console::LuviKunG.Console.LuviConsole
+  styleSheet: {fileID: 7433441132597879392, guid: de9ba989d83dbcd49b0d60a07db1fbef,
+    type: 3}
   logCapacity: 64
   executeCapacity: 16
   defaultFontSize: 16
@@ -169,9 +170,62 @@ MonoBehaviour:
   autoShowError: 0
   autoShowException: 0
   commandLog: 1
-  toggleConsoleKeys: 1a010000
-  togglePreviewKeys: 1b010000
-  toggleScreenMessageKeys: 1c010000
+  toggleConsoleAction:
+    m_Name: Toggle Console
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: 05709903-2e11-4c79-a1f0-afd8cbf8ef6d
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 855c5241-4fe9-4eae-950c-1182f1e483a0
+      m_Path: <Keyboard>/f1
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Toggle Console
+      m_Flags: 0
+    m_Flags: 0
+    m_Priority: 0
+  togglePreviewAction:
+    m_Name: Toggle Preview
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: d64e76a9-c081-40f2-aa9b-394d523f5d3b
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: f4672a79-d7b1-4296-bd50-ca714fb51e87
+      m_Path: <Keyboard>/f2
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Toggle Preview
+      m_Flags: 0
+    m_Flags: 0
+    m_Priority: 0
+  toggleScreenMessageAction:
+    m_Name: Toggle Screen Message
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: a2ccddf3-3c6c-456c-b432-2dce2bfdb4e4
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 604bfce2-78f7-4e4b-93cb-b74235630445
+      m_Path: <Keyboard>/f3
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Toggle Screen Message
+      m_Flags: 0
+    m_Flags: 0
+    m_Priority: 0
+  swipeToToggle: 1
+  swipeRatio: 0.8
   previewAnchorPosition: 8
   previewSize: {x: 128, y: 96}
   showScreenMessageOnAwake: 1
@@ -202,7 +256,7 @@ LightingSettings:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Settings.lighting
-  serializedVersion: 9
+  serializedVersion: 10
   m_EnableBakedLightmaps: 0
   m_EnableRealtimeLightmaps: 0
   m_RealtimeEnvironmentLighting: 1
@@ -217,6 +271,12 @@ LightingSettings:
   m_BakeResolution: 40
   m_Padding: 2
   m_LightmapCompression: 3
+  m_LightmapPackingMode: 1
+  m_LightmapPackingMethod: 0
+  m_XAtlasPackingAttempts: 16384
+  m_XAtlasBruteForce: 0
+  m_XAtlasBlockAlign: 0
+  m_XAtlasRepackUnderutilizedLightmaps: 1
   m_AO: 0
   m_AOMaxDistance: 1
   m_CompAOExponent: 1

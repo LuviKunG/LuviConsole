@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
+using UnityEngine.UIElements;
 
 namespace LuviKunG.Console
 {
@@ -9,11 +13,9 @@ namespace LuviKunG.Console
 
     [AddComponentMenu("LuviKunG/LuviConsole")]
     [HelpURL("https://github.com/LuviKunG/LuviConsole")]
-    public sealed class LuviConsole : MonoBehaviour
+    [DisallowMultipleComponent]
+    public sealed partial class LuviConsole : MonoBehaviour
     {
-        // Shared (main–thread) StringBuilder instance.
-        private static readonly StringBuilder str = new();
-
         #region Nested Types
 
         private readonly struct CommandPreset
@@ -34,56 +36,15 @@ namespace LuviKunG.Console
             }
         }
 
-        private struct ScreenMessage
+        private sealed class ScreenMessage
         {
-            // Note: using a static builder here is OK if you know only one message is formatted at a time.
-            private static readonly StringBuilder str = new();
-
-            public readonly string message;
+            public readonly string text;
             public float duration;
-            public readonly Color? color;
-            public readonly bool bold;
-            public readonly bool italic;
+            public Label label;
 
-            public ScreenMessage(string message, float duration)
+            public ScreenMessage(string message, float duration, Color? color, bool bold, bool italic)
             {
-                this.message = message;
-                this.duration = duration;
-                this.color = null;
-                this.bold = false;
-                this.italic = false;
-            }
-
-            public ScreenMessage(string message, float duration, bool bold, bool italic)
-            {
-                this.message = message;
-                this.duration = duration;
-                this.color = null;
-                this.bold = bold;
-                this.italic = italic;
-            }
-
-            public ScreenMessage(string message, float duration, Color color)
-            {
-                this.message = message;
-                this.duration = duration;
-                this.color = color;
-                this.bold = false;
-                this.italic = false;
-            }
-
-            public ScreenMessage(string message, float duration, Color color, bool bold, bool italic)
-            {
-                this.message = message;
-                this.duration = duration;
-                this.color = color;
-                this.bold = bold;
-                this.italic = italic;
-            }
-
-            public override string ToString()
-            {
-                str.Clear();
+                StringBuilder str = GetStringBuilder();
                 str.Append(message);
                 if (color.HasValue)
                     str.Color(color.Value);
@@ -91,7 +52,29 @@ namespace LuviKunG.Console
                     str.Bold();
                 if (italic)
                     str.Italic();
-                return str.ToString();
+                this.text = str.ToString();
+                this.duration = duration;
+            }
+        }
+
+        private enum LogKind
+        {
+            Custom,
+            Verbose,
+            Warning,
+            Error,
+            Exception,
+        }
+
+        private readonly struct PendingLog
+        {
+            public readonly string text;
+            public readonly LogKind kind;
+
+            public PendingLog(string text, LogKind kind)
+            {
+                this.text = text;
+                this.kind = kind;
             }
         }
 
@@ -170,11 +153,21 @@ namespace LuviKunG.Console
         #region Constants and Static Fields
 
         private const string DEFAULT_RESOURCE_PATH_PREFAB = "LuviKunG/LuviConsole";
-        private const string DEFAULT_RESOURCE_PATH_GUISKIN = "LuviConsoleGUI";
 
         private static readonly Color LOG_COLOR_COMMAND = new Color(0.0f, 1.0f, 1.0f, 1.0f); // Cyan
         private static readonly Color LOG_COLOR_WARNING = new Color(1.0f, 1.0f, 0.0f, 1.0f); // Yellow
         private static readonly Color LOG_COLOR_ERROR = new Color(1.0f, 0.0f, 0.0f, 1.0f);   // Red
+
+        // Log callbacks can arrive from any thread, so each thread formats with its own builder.
+        [ThreadStatic]
+        private static StringBuilder threadStringBuilder;
+
+        private static StringBuilder GetStringBuilder()
+        {
+            threadStringBuilder ??= new StringBuilder();
+            threadStringBuilder.Clear();
+            return threadStringBuilder;
+        }
 
         private static LuviConsole instance;
         public static LuviConsole Instance
@@ -198,26 +191,114 @@ namespace LuviKunG.Console
         #region Inspector Fields
 
         [SerializeField]
-        private GUISkin guiSkin;
+        [Tooltip("Optional style sheet that replaces the default LuviConsole style sheet.")]
+        private StyleSheet styleSheet;
 
+        [Min(0)]
+        [Tooltip("The capacity of list that will show debug log on console window.")]
         public int logCapacity = 64;
-        public int executeCapacity = 16; // renamed from "excuteCapacity"
-#if UNITY_ANDROID || UNITY_IOS
-        public float swipeRatio = 0.8f;
-#endif
+        [Min(0)]
+        [FormerlySerializedAs("excuteCapacity")]
+        [Tooltip("The capacity of executed commands that are kept in history.")]
+        public int executeCapacity = 16;
+        [Range(MIN_FONT_SIZE, MAX_FONT_SIZE)]
+        [Tooltip("Default font size of console when it getting start.")]
         public int defaultFontSize = 16;
+        [Tooltip("Automatically show logs when player is get warning log.")]
         public bool autoShowWarning = false;
+        [Tooltip("Automatically show logs when player is get error log.")]
         public bool autoShowError = false;
+        [Tooltip("Automatically show logs when player is get exception log.")]
         public bool autoShowException = false;
+        [Tooltip("Log the command after you executed.")]
         public bool commandLog = false;
-        public KeyCode[] toggleConsoleKeys = new KeyCode[] { KeyCode.F1 };
-        public KeyCode[] togglePreviewKeys = new KeyCode[] { KeyCode.F2 };
-        public KeyCode[] toggleScreenMessageKeys = new KeyCode[] { KeyCode.F3 };
 
+        [Tooltip("Input action to toggle open and close of the console.")]
+        public InputAction toggleConsoleAction = new InputAction("Toggle Console", InputActionType.Button, "<Keyboard>/f1");
+        [Tooltip("Input action to toggle open and close of the preview.")]
+        public InputAction togglePreviewAction = new InputAction("Toggle Preview", InputActionType.Button, "<Keyboard>/f2");
+        [Tooltip("Input action to toggle open and close of the screen message.")]
+        public InputAction toggleScreenMessageAction = new InputAction("Toggle Screen Message", InputActionType.Button, "<Keyboard>/f3");
+        [Tooltip("Allow swipe gestures on touch screens. Swipe from the left half to toggle the console, from the right half to toggle the preview.")]
+        public bool swipeToToggle = true;
+        [Range(0.01f, 0.99f)]
+        [Tooltip("The swipe distance, as a ratio of screen height, that is required to toggle the console or preview.")]
+        public float swipeRatio = 0.8f;
+
+        [Tooltip("Define anchor position of preview window.")]
         public TextAnchor previewAnchorPosition = TextAnchor.LowerRight;
+        [Tooltip("Define size of preview window.")]
         public Vector2 previewSize = new Vector2(128f, 96f);
+        [Tooltip("Show screen messages when the console awakes.")]
         public bool showScreenMessageOnAwake = true;
+        [Tooltip("Extra inset of the UI from the screen safe area.")]
         public Extend2D extendUI = new Extend2D(0);
+
+        #endregion
+
+        #region Internal Data
+
+        private readonly Dictionary<string, LuviCommandExecution> commandData = new Dictionary<string, LuviCommandExecution>();
+        private readonly List<CommandPreset> commandPresets = new List<CommandPreset>();
+        private readonly List<string> logExecuteCommands = new List<string>();
+        private readonly List<ScreenMessage> screenMessages = new List<ScreenMessage>();
+        private readonly ConcurrentQueue<PendingLog> pendingLogs = new ConcurrentQueue<PendingLog>();
+        private readonly List<PendingLog> flushingLogs = new List<PendingLog>();
+
+        private bool isShowingConsole;
+        private bool isShowingPreview;
+        private bool isShowingScreenMessage;
+        private string commandDisplayingGroup = null;
+        private int logExecutePosition;
+        private int countLogVerbose;
+        private int countLogWarning;
+        private int countLogError;
+        private int countLogException;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Show or hide the console window.
+        /// </summary>
+        public bool IsShowingConsole
+        {
+            get => isShowingConsole;
+            set
+            {
+                if (isShowingConsole == value)
+                    return;
+                isShowingConsole = value;
+                OnConsoleVisibilityChanged();
+            }
+        }
+
+        /// <summary>
+        /// Show or hide the preview window.
+        /// </summary>
+        public bool IsShowingPreview
+        {
+            get => isShowingPreview;
+            set
+            {
+                isShowingPreview = value;
+                RefreshVisibility();
+            }
+        }
+
+        /// <summary>
+        /// Show or hide the screen messages.
+        /// </summary>
+        public bool IsShowingScreenMessage
+        {
+            get => isShowingScreenMessage;
+            set
+            {
+                isShowingScreenMessage = value;
+                RefreshVisibility();
+            }
+        }
 
         #endregion
 
@@ -238,193 +319,58 @@ namespace LuviKunG.Console
 
         private void OnEnable()
         {
+            if (instance != this)
+                return;
             Application.logMessageReceivedThreaded += LogReceiveCallback;
+            EnableInputActions();
+            AttachUI();
         }
 
         private void OnDisable()
         {
             Application.logMessageReceivedThreaded -= LogReceiveCallback;
+            DisableInputActions();
+            DetachUI();
+        }
+
+        private void OnDestroy()
+        {
+            if (instance == this)
+                instance = null;
+            DestroyUI();
         }
 
         private void Update()
         {
-            float deltaTime = Time.deltaTime;
             UpdateInput();
-            UpdateScreenMessages(deltaTime);
-            if (isShowingConsole)
-                UpdateConsoleScrollDrag();
+            UpdateScreenMessages(Time.unscaledDeltaTime);
         }
 
-        private void OnGUI()
+        private void LateUpdate()
         {
-            const float SCREEN_MESSAGE_PADDING = 10.0f;
-            GUI.skin = guiSkin;
-            Rect safeArea = Screen.safeArea;
-            // Convert safe area to “top‐left” coordinates.
-            Rect rectScreen = new Rect(safeArea.x, Screen.height - (safeArea.y + safeArea.height), safeArea.width, safeArea.height);
-            Rect rectExtendUI = new Rect(rectScreen.x + extendUI.left, rectScreen.y + extendUI.top,
-                                          rectScreen.width - extendUI.width, rectScreen.height - extendUI.height);
-            Rect rectScreenMessage = new Rect(rectExtendUI.x + SCREEN_MESSAGE_PADDING, rectExtendUI.y + SCREEN_MESSAGE_PADDING,
-                                              rectExtendUI.width - SCREEN_MESSAGE_PADDING, rectExtendUI.height - SCREEN_MESSAGE_PADDING);
-
-            if (isShowingConsole)
-                UpdateConsoleUI(rectExtendUI);
-            if (isShowingPreview)
-                UpdatePreviewUI(rectExtendUI);
-            if (isShowingScreenMessage)
-                UpdateScreenMessageUI(rectScreenMessage);
+            AttachUI();
+            FlushPendingLogs();
+            UpdateUILayout();
         }
 
 #if UNITY_EDITOR
-        private void Reset() => LoadGUISkin();
+        private void OnValidate()
+        {
+            if (Application.isPlaying)
+                ApplyUISettings();
+        }
 #endif
 
         #endregion
 
-        #region Initialization and Input
+        #region Initialization
 
         private void Initialize()
         {
             isShowingScreenMessage = showScreenMessageOnAwake;
-            LoadGUISkin();
+            SetupUI();
             DontDestroyOnLoad(gameObject);
         }
-
-        // Helper method to check if a key combo was pressed.
-        private bool CheckKeyCombo(KeyCode[] keys)
-        {
-            if (keys == null || keys.Length == 0)
-                return false;
-            for (int i = 0; i < keys.Length - 1; i++)
-            {
-                if (!Input.GetKey(keys[i]))
-                    return false;
-            }
-            return Input.GetKeyDown(keys[keys.Length - 1]);
-        }
-
-        private void UpdateInput()
-        {
-#if UNITY_EDITOR
-            if (CheckKeyCombo(toggleConsoleKeys))
-            {
-                isShowingConsole = !isShowingConsole;
-                GUI.FocusControl("commandfield");
-            }
-            if (CheckKeyCombo(togglePreviewKeys))
-                isShowingPreview = !isShowingPreview;
-            if (CheckKeyCombo(toggleScreenMessageKeys))
-                isShowingScreenMessage = !isShowingScreenMessage;
-#elif UNITY_ANDROID || UNITY_IOS
-            if (Input.touchCount > 0)
-            {
-                Touch touch0 = Input.GetTouch(0);
-                if (touch0.phase == TouchPhase.Began)
-                {
-                    touchSwipePosStart = touch0.position;
-                }
-                else if (touch0.phase == TouchPhase.Moved)
-                {
-                    touchSwipePosMoving = touch0.position;
-                    float screenDivision = Screen.width / 2;
-                    bool isShowConsole = touchSwipePosStart.x < screenDivision;
-                    bool isShowPreview = touchSwipePosStart.x > screenDivision;
-                    Vector3 direction = touchSwipePosMoving - touchSwipePosStart;
-                    if (Vector3.Distance(touchSwipePosStart, touchSwipePosMoving) > (Screen.height * swipeRatio))
-                    {
-                        if (isShowConsole && Mathf.Abs(direction.x) >= Mathf.Abs(direction.y))
-                        {
-                            isShowingConsole = (direction.x > 0);
-                            touchSwipePosStart = touchSwipePosMoving = Vector3.zero;
-                        }
-                        if (isShowPreview && Mathf.Abs(direction.x) >= Mathf.Abs(direction.y))
-                        {
-                            isShowingPreview = (direction.x < 0);
-                            touchSwipePosStart = touchSwipePosMoving = Vector3.zero;
-                        }
-                    }
-                }
-            }
-#endif
-        }
-
-        private void LoadGUISkin()
-        {
-            guiSkin ??= Resources.Load<GUISkin>(DEFAULT_RESOURCE_PATH_GUISKIN);
-            if (guiSkin != null)
-                guiSkin.label.fontSize = defaultFontSize;
-        }
-
-        #endregion
-
-        #region UI Helpers and Scrolling
-
-        private void UpdateConsoleScrollDrag()
-        {
-            Vector2 currentPosition = Input.mousePosition;
-            currentPosition.y = Screen.height - currentPosition.y; // Convert mouse pos to top–left origin.
-            if (Input.GetMouseButtonDown(0) && rectDebugLogScrollDrag.Contains(currentPosition))
-            {
-                isScrollDebugDragging = true;
-                scrollDebugDragPosition = currentPosition;
-            }
-            if (Input.GetMouseButtonUp(0))
-                isScrollDebugDragging = false;
-            if (isScrollDebugDragging)
-            {
-                Vector2 delta = scrollDebugDragPosition - currentPosition;
-                scrollDebugPosition += delta;
-                scrollDebugDragPosition = currentPosition;
-            }
-        }
-
-        // These fields are used in UI layout.
-        private readonly Vector2 scrollLockPosition = new Vector2(0, Mathf.Infinity);
-        private Rect rectDebugLogBackground;
-        private Rect rectDebugLogScroll;
-        private Rect rectDebugLogScrollDrag;
-        private Rect rectDebugButtonClear;
-        private Rect rectDebugButtonFontInc;
-        private Rect rectDebugButtonFontDesc;
-        private Rect rectCommandBackground;
-        private Rect rectCommandArea;
-        private Rect rectCommandInput;
-        private Rect rectCommandHelpBox;
-        private Rect rectCommandReturn;
-        private Rect rectPreviewWindow;
-        private Vector2 scrollDebugPosition = Vector2.zero;
-        private Vector2 scrollCommandPosition = Vector2.zero;
-        private Vector2 scrollDebugDragPosition = Vector2.zero;
-        private Vector2 scrollCommandDragPosition = Vector2.zero;
-
-        #endregion
-
-        #region Internal Data
-
-        private Dictionary<string, LuviCommandExecution> commandData = new Dictionary<string, LuviCommandExecution>();
-        private List<CommandPreset> commandPresets = new List<CommandPreset>();
-        private List<string> log = new List<string>();
-        private List<string> logExecuteCommands = new List<string>();
-        private List<ScreenMessage> screenMessages = new List<ScreenMessage>();
-
-        private bool isShowingConsole;
-        private bool isShowingPreview;
-        private bool isShowingScreenMessage;
-        private bool isScrollDebugDragging = false;
-        private string commandHelpText = string.Empty;
-        private string command = string.Empty;
-        private string commandDisplayingGroup = null;
-        private int logExecutePosition;
-        private int indexConsole;
-        private int indexDebug;
-        private int countLogVerbose;
-        private int countLogWarning;
-        private int countLogError;
-        private int countLogException;
-#if UNITY_ANDROID || UNITY_IOS
-        private Vector3 touchSwipePosStart = Vector3.zero;
-        private Vector3 touchSwipePosMoving = Vector3.zero;
-#endif
 
         #endregion
 
@@ -434,361 +380,165 @@ namespace LuviKunG.Console
         {
             if (string.IsNullOrEmpty(message))
                 return;
-            log.Add(message);
-            UpdateLogCapacity();
-            ScrollLogToBottom();
-        }
-
-        public void LogScreen(string message, float duration)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-                return;
-            ScreenMessage screenMessage = new(message, duration);
-            LogScreen(ref screenMessage);
-        }
-
-        public void LogScreen(string message, float duration, bool bold, bool italic)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-                return;
-            ScreenMessage screenMessage = new(message, duration, bold, italic);
-            LogScreen(ref screenMessage);
-        }
-
-        public void LogScreen(string message, float duration, Color color)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-                return;
-            ScreenMessage screenMessage = new(message, duration, color);
-            LogScreen(ref screenMessage);
-        }
-
-        public void LogScreen(string message, float duration, Color color, bool bold, bool italic)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-                return;
-            ScreenMessage screenMessage = new(message, duration, color, bold, italic);
-            LogScreen(ref screenMessage);
-        }
-
-        private void LogScreen(ref ScreenMessage message)
-        {
-            screenMessages.Add(message);
+            pendingLogs.Enqueue(new PendingLog(message, LogKind.Custom));
         }
 
         public void Log(string message, Color color)
         {
             if (string.IsNullOrWhiteSpace(message))
                 return;
-            str.Clear();
+            StringBuilder str = GetStringBuilder();
             str.Append(message);
             str.Color(color);
-            log.Add(str.ToString());
-            UpdateLogCapacity();
-            ScrollLogToBottom();
+            Log(str.ToString());
         }
 
         public void Log(string message, bool bold, bool italic)
         {
             if (string.IsNullOrWhiteSpace(message))
                 return;
-            str.Clear();
+            StringBuilder str = GetStringBuilder();
             str.Append(message);
             if (bold)
                 str.Bold();
             if (italic)
                 str.Italic();
-            log.Add(str.ToString());
-            UpdateLogCapacity();
-            ScrollLogToBottom();
+            Log(str.ToString());
         }
 
         public void Log(string message, Color color, bool bold, bool italic)
         {
             if (string.IsNullOrWhiteSpace(message))
                 return;
-            str.Clear();
+            StringBuilder str = GetStringBuilder();
             str.Append(message);
             str.Color(color);
             if (bold)
                 str.Bold();
             if (italic)
                 str.Italic();
-            log.Add(str.ToString());
-            UpdateLogCapacity();
-            ScrollLogToBottom();
+            Log(str.ToString());
         }
 
+        public void LogScreen(string message, float duration)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            LogScreen(new ScreenMessage(message, duration, null, false, false));
+        }
+
+        public void LogScreen(string message, float duration, bool bold, bool italic)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            LogScreen(new ScreenMessage(message, duration, null, bold, italic));
+        }
+
+        public void LogScreen(string message, float duration, Color color)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            LogScreen(new ScreenMessage(message, duration, color, false, false));
+        }
+
+        public void LogScreen(string message, float duration, Color color, bool bold, bool italic)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            LogScreen(new ScreenMessage(message, duration, color, bold, italic));
+        }
+
+        private void LogScreen(ScreenMessage message)
+        {
+            screenMessages.Add(message);
+            AddScreenMessageLabel(message);
+        }
+
+        // This callback may be invoked from any thread, so logs are queued and flushed on the main thread.
         private void LogReceiveCallback(string message, string stackTrace, LogType type)
         {
+            StringBuilder str = GetStringBuilder();
             switch (type)
             {
                 case LogType.Warning:
-                    str.Clear();
                     str.Append("Warning: ").Append(message);
                     str.Color(LOG_COLOR_WARNING).Italic();
-                    Log(str.ToString());
-                    if (autoShowWarning && !isShowingConsole)
-                        isShowingConsole = true;
-                    countLogWarning++;
+                    pendingLogs.Enqueue(new PendingLog(str.ToString(), LogKind.Warning));
                     break;
                 case LogType.Error:
-                    str.Clear();
                     str.Append("Error: ").Append(message);
                     str.Color(LOG_COLOR_ERROR).Bold();
-                    Log(str.ToString());
-                    if (autoShowError && !isShowingConsole)
-                        isShowingConsole = true;
-                    countLogError++;
+                    pendingLogs.Enqueue(new PendingLog(str.ToString(), LogKind.Error));
                     break;
                 case LogType.Exception:
-                    str.Clear();
                     str.Append("Exception: ").Append(message).Bold().AppendLine().Append(stackTrace);
                     str.Color(LOG_COLOR_ERROR);
-                    Log(str.ToString());
-                    if (autoShowException && !isShowingConsole)
-                        isShowingConsole = true;
-                    countLogException++;
+                    pendingLogs.Enqueue(new PendingLog(str.ToString(), LogKind.Exception));
                     break;
                 default:
-                    Log(message);
-                    countLogVerbose++;
+                    if (!string.IsNullOrEmpty(message))
+                        pendingLogs.Enqueue(new PendingLog(message, LogKind.Verbose));
                     break;
             }
+        }
+
+        private void FlushPendingLogs()
+        {
+            if (pendingLogs.IsEmpty)
+                return;
+            flushingLogs.Clear();
+            while (pendingLogs.TryDequeue(out PendingLog pendingLog))
+                flushingLogs.Add(pendingLog);
+            bool shouldShowConsole = false;
+            for (int i = 0; i < flushingLogs.Count; ++i)
+            {
+                switch (flushingLogs[i].kind)
+                {
+                    case LogKind.Verbose:
+                        countLogVerbose++;
+                        break;
+                    case LogKind.Warning:
+                        countLogWarning++;
+                        shouldShowConsole |= autoShowWarning;
+                        break;
+                    case LogKind.Error:
+                        countLogError++;
+                        shouldShowConsole |= autoShowError;
+                        break;
+                    case LogKind.Exception:
+                        countLogException++;
+                        shouldShowConsole |= autoShowException;
+                        break;
+                }
+            }
+            // Only the newest entries that fit in the capacity will ever be visible.
+            int start = Mathf.Max(0, flushingLogs.Count - logCapacity);
+            for (int i = start; i < flushingLogs.Count; ++i)
+                AddLogEntry(flushingLogs[i].text);
+            flushingLogs.Clear();
+            RefreshPreviewCounts();
+            if (shouldShowConsole)
+                IsShowingConsole = true;
         }
 
         public void ClearLogs()
         {
-            log.Clear();
+            ClearLogEntries();
             countLogVerbose = countLogWarning = countLogError = countLogException = 0;
-        }
-
-        private void ScrollLogToBottom() => scrollDebugPosition = scrollLockPosition;
-
-        private void UpdateLogCapacity()
-        {
-            while (log.Count > logCapacity)
-                log.RemoveAt(0);
+            RefreshPreviewCounts();
         }
 
         private void UpdateScreenMessages(float deltaTime)
         {
-            // Iterate backward so removals don’t mess up the index.
+            // Iterate backward so removals don't mess up the index.
             for (int i = screenMessages.Count - 1; i >= 0; --i)
             {
-                float duration = screenMessages[i].duration - deltaTime;
-                if (duration < 0.0f)
+                ScreenMessage message = screenMessages[i];
+                message.duration -= deltaTime;
+                if (message.duration < 0.0f)
+                {
+                    message.label?.RemoveFromHierarchy();
                     screenMessages.RemoveAt(i);
-                else
-                {
-                    var msg = screenMessages[i];
-                    msg.duration = duration;
-                    screenMessages[i] = msg;
-                }
-            }
-        }
-
-        #endregion
-
-        #region Console UI
-
-        private void UpdateConsoleUI(Rect rect)
-        {
-            // Layout differently for landscape vs. portrait.
-            if (rect.width > rect.height)
-            {
-                // Landscape: split rect vertically.
-                Rect rectLeft = new Rect(rect.x, rect.y, rect.width / 2, rect.height);
-                Rect rectRight = new Rect(rect.x + rect.width / 2, rect.y, rect.width / 2, rect.height);
-                rectDebugLogBackground = new Rect(rectLeft.x, rectLeft.y, rectLeft.width, rectLeft.height - 64);
-                rectDebugLogScroll = new Rect(rectLeft.x + 8, rectLeft.y + 24, rectLeft.width - 16, rectLeft.height - 96);
-                rectDebugLogScrollDrag = new Rect(rectLeft.x + 8, rectLeft.y + 24, rectLeft.width - 48, rectLeft.height - 96);
-                rectDebugButtonClear = new Rect(rectLeft.x, rectLeft.y + rectLeft.height - 64, 128, 64);
-                rectDebugButtonFontInc = new Rect(rectLeft.x + rectLeft.width - 128, rectLeft.y + rectLeft.height - 64, 64, 64);
-                rectDebugButtonFontDesc = new Rect(rectLeft.x + rectLeft.width - 64, rectLeft.y + rectLeft.height - 64, 64, 64);
-                rectCommandBackground = new Rect(rectRight.x, rectRight.y + 64, rectRight.width, rectRight.height - 64);
-                rectCommandArea = new Rect(rectRight.x + 8, rectRight.y + 136, rectRight.width - 16, rectRight.height - 144);
-                rectCommandInput = new Rect(rectRight.x, rectRight.y, rectRight.width - 64, 64);
-                rectCommandHelpBox = new Rect(rectRight.x + 8, rectRight.y + 72, rectRight.width - 64, 60);
-                rectCommandReturn = new Rect(rectRight.x + rectRight.width - 64, rectRight.y, 64, 64);
-            }
-            else
-            {
-                // Portrait: split rect horizontally.
-                Rect rectTop = new Rect(rect.x, rect.y, rect.width, rect.height / 2);
-                Rect rectBottom = new Rect(rect.x, rect.y + rect.height / 2, rect.width, rect.height / 2);
-                rectDebugLogBackground = new Rect(rectTop.x, rectTop.y, rectTop.width, rectTop.height - 64);
-                rectDebugLogScroll = new Rect(rectTop.x + 8, rectTop.y + 24, rectTop.width - 16, rectTop.height - 96);
-                rectDebugLogScrollDrag = new Rect(rectTop.x + 8, rectTop.y + 24, rectTop.width - 48, rectTop.height - 96);
-                rectDebugButtonClear = new Rect(rectTop.x, rectTop.y + rectTop.height - 64, 128, 64);
-                rectDebugButtonFontInc = new Rect(rectTop.x + rectTop.width - 128, rectTop.y + rectTop.height - 64, 64, 64);
-                rectDebugButtonFontDesc = new Rect(rectTop.x + rectTop.width - 64, rectTop.y + rectTop.height - 64, 64, 64);
-                rectCommandBackground = new Rect(rectBottom.x, rectBottom.y + 64, rectBottom.width, rectBottom.height - 64);
-                rectCommandArea = new Rect(rectBottom.x + 8, rectBottom.y + 136, rectBottom.width - 16, rectBottom.height - 144);
-                rectCommandInput = new Rect(rectBottom.x, rectBottom.y, rectBottom.width - 64, 64);
-                rectCommandHelpBox = new Rect(rectBottom.x + 8, rectBottom.y + 72, rectBottom.width - 64, 60);
-                rectCommandReturn = new Rect(rectBottom.x + rectBottom.width - 64, rectBottom.y, 64, 64);
-            }
-
-            // Draw the debug log background.
-            GUI.Box(rectDebugLogBackground, GUIContent.none, guiSkin.customStyles[0]);
-            GUILayout.Space(24f);
-            using (new GUILayout.AreaScope(rectDebugLogScroll))
-            {
-                using (var scrollScope = new GUILayout.ScrollViewScope(scrollDebugPosition, guiSkin.scrollView))
-                {
-                    scrollScope.handleScrollWheel = true;
-                    scrollDebugPosition = scrollScope.scrollPosition;
-                    // Only draw up to logCapacity entries.
-                    for (indexDebug = 0; indexDebug < log.Count && indexDebug <= logCapacity; indexDebug++)
-                    {
-                        GUILayout.Label(log[indexDebug], guiSkin.label);
-                    }
-                }
-            }
-            if (GUI.Button(rectDebugButtonClear, "Clear", guiSkin.button))
-                ClearLogs();
-            if (GUI.Button(rectDebugButtonFontInc, "A+", guiSkin.button))
-            {
-                if (guiSkin.label.fontSize < 64)
-                    guiSkin.label.fontSize += 2;
-            }
-            if (GUI.Button(rectDebugButtonFontDesc, "A-", guiSkin.button))
-            {
-                if (guiSkin.label.fontSize > 8)
-                    guiSkin.label.fontSize -= 2;
-            }
-            GUI.SetNextControlName("commandfield");
-            GUI.enabled = commandData.Count > 0;
-            command = GUI.TextField(rectCommandInput, command, guiSkin.textField);
-            if (GUI.Button(rectCommandReturn, "Send", guiSkin.button))
-                ExecuteCurrentCommand();
-            GUI.enabled = true;
-            GUI.Box(rectCommandBackground, GUIContent.none, guiSkin.customStyles[1]);
-            GUI.Label(rectCommandHelpBox, commandHelpText, guiSkin.customStyles[4]);
-
-            // Draw the command–preset list.
-            using (new GUILayout.AreaScope(rectCommandArea))
-            {
-                using (var scrollScope = new GUILayout.ScrollViewScope(scrollCommandPosition, guiSkin.scrollView))
-                {
-                    scrollScope.handleScrollWheel = true;
-                    scrollCommandPosition = scrollScope.scrollPosition;
-                    string cacheGroupName = null;
-                    using (new GUILayout.VerticalScope())
-                    {
-                        foreach (var commandPreset in commandPresets)
-                        {
-                            if (cacheGroupName != commandPreset.group)
-                            {
-                                cacheGroupName = commandPreset.group;
-                                if (!string.IsNullOrEmpty(cacheGroupName))
-                                {
-                                    if (GUILayout.Button(cacheGroupName, guiSkin.customStyles[2]))
-                                        commandDisplayingGroup = commandDisplayingGroup == cacheGroupName ? null : cacheGroupName;
-                                }
-                                else
-                                    GUILayout.Label("Etc.", guiSkin.customStyles[2]);
-                            }
-                            if (!string.IsNullOrEmpty(commandDisplayingGroup) && commandDisplayingGroup == cacheGroupName ||
-                                string.IsNullOrEmpty(cacheGroupName))
-                            {
-                                if (GUILayout.Button(commandPreset.name, guiSkin.customStyles[3]))
-                                {
-                                    commandHelpText = commandPreset.description ?? string.Empty;
-                                    if (commandPreset.executeImmediately)
-                                        _ = ExecuteCommand(commandPreset.preset);
-                                    else
-                                    {
-                                        command = commandPreset.preset;
-                                        GUI.FocusControl("commandfield");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            // Handle key events (up/down arrows, enter) when the text field is focused.
-            if (GUI.GetNameOfFocusedControl() == "commandfield" && Event.current.isKey)
-            {
-                switch (Event.current.keyCode)
-                {
-                    case KeyCode.UpArrow:
-                        GetPreviousExecuteLog();
-                        break;
-                    case KeyCode.DownArrow:
-                        GetNextExecuteLog();
-                        break;
-                    case KeyCode.Return:
-                    case KeyCode.KeypadEnter:
-                        ExecuteCurrentCommand();
-                        break;
-                }
-            }
-        }
-
-        private void UpdatePreviewUI(Rect rect)
-        {
-            Rect GetRectByAnchor(Rect rect, TextAnchor anchor, Vector2 size) => anchor switch
-            {
-                TextAnchor.UpperLeft => new Rect(rect.x, rect.y, size.x, size.y),
-                TextAnchor.UpperCenter => new Rect(rect.x + (rect.width - size.x) / 2, rect.y, size.x, size.y),
-                TextAnchor.UpperRight => new Rect(rect.x + rect.width - size.x, rect.y, size.x, size.y),
-                TextAnchor.MiddleLeft => new Rect(rect.x, rect.y + (rect.height - size.y) / 2, size.x, size.y),
-                TextAnchor.MiddleCenter => new Rect(rect.x + (rect.width - size.x) / 2, rect.y + (rect.height - size.y) / 2, size.x, size.y),
-                TextAnchor.MiddleRight => new Rect(rect.x + rect.width - size.x, rect.y + (rect.height - size.y) / 2, size.x, size.y),
-                TextAnchor.LowerLeft => new Rect(rect.x, rect.y + rect.height - size.y, size.x, size.y),
-                TextAnchor.LowerCenter => new Rect(rect.x + (rect.width - size.x) / 2, rect.y + rect.height - size.y, size.x, size.y),
-                TextAnchor.LowerRight => new Rect(rect.x + rect.width - size.x, rect.y + rect.height - size.y, size.x, size.y),
-                _ => new Rect(0, 0, size.x, size.y),
-            };
-
-            rectPreviewWindow = GetRectByAnchor(rect, previewAnchorPosition, previewSize);
-            using (new GUILayout.AreaScope(rectPreviewWindow, GUIContent.none, guiSkin.customStyles[5]))
-            {
-                using (new GUILayout.VerticalScope())
-                {
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        string color = $"#{ColorUtility.ToHtmlStringRGB(Color.white)}";
-                        GUILayout.Label($"<color={color}>Verbose:</color>", guiSkin.customStyles[6]);
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label($"<color={color}>{countLogVerbose:N0}</color>", guiSkin.customStyles[6]);
-                    }
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        string color = $"#{ColorUtility.ToHtmlStringRGB(Color.yellow)}";
-                        GUILayout.Label($"<color={color}>Warning:</color>", guiSkin.customStyles[6]);
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label($"<color={color}>{countLogWarning:N0}</color>", guiSkin.customStyles[6]);
-                    }
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        string color = $"#{ColorUtility.ToHtmlStringRGB(Color.red)}";
-                        GUILayout.Label($"<color={color}>Error:</color>", guiSkin.customStyles[6]);
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label($"<color={color}>{countLogError:N0}</color>", guiSkin.customStyles[6]);
-                    }
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        string color = $"#{ColorUtility.ToHtmlStringRGB(Color.red)}";
-                        GUILayout.Label($"<color={color}><b>Exception:</b></color>", guiSkin.customStyles[6]);
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label($"<color={color}><b>{countLogException:N0}</b></color>", guiSkin.customStyles[6]);
-                    }
-                }
-            }
-        }
-
-        private void UpdateScreenMessageUI(Rect rect)
-        {
-            using (new GUILayout.AreaScope(rect))
-            {
-                using (new GUILayout.VerticalScope())
-                {
-                    for (int i = 0; i < screenMessages.Count; ++i)
-                        GUILayout.Label(screenMessages[i].ToString());
                 }
             }
         }
@@ -810,9 +560,15 @@ namespace LuviKunG.Console
             if (commandData.ContainsKey(prefix))
                 throw new InvalidOperationException($"Command with prefix '{prefix}' already exists.");
             commandData.Add(prefix, execution);
+            RefreshCommandInputState();
         }
 
-        public bool RemoveCommand(string prefix) => commandData.Remove(prefix);
+        public bool RemoveCommand(string prefix)
+        {
+            bool removed = commandData.Remove(prefix);
+            RefreshCommandInputState();
+            return removed;
+        }
 
         public void AddCommandPreset(string preset, string name, string description = null, string group = null, bool executeImmediately = false)
         {
@@ -820,12 +576,14 @@ namespace LuviKunG.Console
                 throw new ArgumentException("Preset cannot be null or whitespace.", nameof(preset));
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name cannot be null or whitespace.", nameof(name));
-            commandPresets.Add(new CommandPreset(preset, name.Trim(),
+            CommandPreset commandPreset = new CommandPreset(preset, name.Trim(),
                 string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
                 string.IsNullOrWhiteSpace(group) ? null : group.Trim(),
-                executeImmediately));
-            // For a small list, sorting each time is acceptable.
-            commandPresets.Sort((lhs, rhs) => string.Compare(lhs.group, rhs.group, StringComparison.Ordinal));
+                executeImmediately);
+            // Insert after every preset of the same or lower group, so the list stays sorted by group in insertion order.
+            int index = commandPresets.FindIndex(cp => string.Compare(cp.group, commandPreset.group, StringComparison.Ordinal) > 0);
+            commandPresets.Insert(index < 0 ? commandPresets.Count : index, commandPreset);
+            RebuildCommandPresets();
         }
 
         public bool RemoveCommandPreset(string name)
@@ -834,6 +592,7 @@ namespace LuviKunG.Console
             if (index < 0)
                 return false;
             commandPresets.RemoveAt(index);
+            RebuildCommandPresets();
             return true;
         }
 
@@ -842,6 +601,7 @@ namespace LuviKunG.Console
             if (index < 0 || index >= commandPresets.Count)
                 return false;
             commandPresets.RemoveAt(index);
+            RebuildCommandPresets();
             return true;
         }
 
@@ -861,16 +621,24 @@ namespace LuviKunG.Console
             return list;
         }
 
-        public void ClearAllCommands() => commandData.Clear();
+        public void ClearAllCommands()
+        {
+            commandData.Clear();
+            RefreshCommandInputState();
+        }
 
-        public void ClearAllCommandPresets() => commandPresets.Clear();
+        public void ClearAllCommandPresets()
+        {
+            commandPresets.Clear();
+            RebuildCommandPresets();
+        }
 
         public bool ExecuteCommand(string command)
         {
-            command = command.Trim();
+            command = command?.Trim() ?? string.Empty;
             if (commandLog)
             {
-                str.Clear();
+                StringBuilder str = GetStringBuilder();
                 str.Append(">").Append(command).Italic().Color(LOG_COLOR_COMMAND);
                 Log(str.ToString());
             }
@@ -881,7 +649,6 @@ namespace LuviKunG.Console
                 {
                     string prefix = arguments[0];
                     LogExecuteCommands(command);
-                    // Use TryGetValue to avoid a duplicate lookup.
                     if (commandData.TryGetValue(prefix, out LuviCommandExecution commandExec))
                     {
                         try
@@ -896,7 +663,7 @@ namespace LuviKunG.Console
                     }
                     else
                     {
-                        str.Clear();
+                        StringBuilder str = GetStringBuilder();
                         str.Append($"No command '{prefix}' found.").Color(LOG_COLOR_COMMAND);
                         Log(str.ToString());
                         return false;
@@ -905,12 +672,6 @@ namespace LuviKunG.Console
                 return false;
             }
             return false;
-        }
-
-        private void ExecuteCurrentCommand()
-        {
-            _ = ExecuteCommand(command);
-            command = string.Empty;
         }
 
         private void LogExecuteCommands(string command)
@@ -970,28 +731,27 @@ namespace LuviKunG.Console
             return arguments;
         }
 
-        private void GetNextExecuteLog()
+        private string GetNextExecuteLog()
         {
             if (logExecuteCommands.Count == 0)
-                return;
+                return null;
             logExecutePosition++;
             if (logExecutePosition >= logExecuteCommands.Count)
             {
                 logExecutePosition = logExecuteCommands.Count - 1;
-                command = string.Empty;
-                return;
+                return string.Empty;
             }
-            command = logExecuteCommands[logExecutePosition];
+            return logExecuteCommands[logExecutePosition];
         }
 
-        private void GetPreviousExecuteLog()
+        private string GetPreviousExecuteLog()
         {
             if (logExecuteCommands.Count == 0)
-                return;
+                return null;
             logExecutePosition--;
             if (logExecutePosition < 0)
                 logExecutePosition = 0;
-            command = logExecuteCommands[logExecutePosition];
+            return logExecuteCommands[logExecutePosition];
         }
 
         #endregion

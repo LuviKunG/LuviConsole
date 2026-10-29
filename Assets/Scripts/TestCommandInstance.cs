@@ -2,6 +2,7 @@ using UnityEngine;
 // Required namespace.
 using LuviKunG.Console;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 public class TestCommandInstance : MonoBehaviour
 {
@@ -37,7 +38,14 @@ public class TestCommandInstance : MonoBehaviour
 
         console.AddCommand("/throw", (args) =>
         {
-            throw new System.Exception("Test throwing exception during execute the command.");
+            try
+            {
+                throw new System.Exception("Test throwing exception during execute the command.");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+            }
         });
 
         // Add a new command preset of '/foo' that will be show as button below of command input in the group of 'Testing'.
@@ -88,9 +96,12 @@ public class TestCommandInstance : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.C))
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null)
+            return;
+        if (keyboard.cKey.wasPressedThisFrame)
             LuviConsole.Instance.Log(RandomString(16));
-        if (Input.GetKeyDown(KeyCode.V))
+        if (keyboard.vKey.wasPressedThisFrame)
             Debug.Log(RandomString(16));
     }
 

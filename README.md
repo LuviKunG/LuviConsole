@@ -1,5 +1,7 @@
 # LuviConsole
-LuviConsole is a console IMGUI of Unity that able to show every log that perform in Unity Debug. include custom command feature. This command are support for displaying in mobile platform (Android & iOS) and WebGL (WASM) platform. Created by Thanut Panichyotai (@[LuviKunG]((https://github.com/LuviKunG)))
+LuviConsole is a runtime console of Unity, built with **UI Toolkit** and the **Input System**, that able to show every log that perform in Unity Debug. include custom command feature. This command are support for displaying in mobile platform (Android & iOS) and WebGL (WASM) platform. Created by Thanut Panichyotai (@[LuviKunG]((https://github.com/LuviKunG)))
+
+> Version 4.0.0 replaced IMGUI and the legacy Input Manager. If you still need the IMGUI version, install version `3.2.0`.
 
 ![LuviConsole IMGUI Instance](images/image01.gif)
 
@@ -10,6 +12,12 @@ In the version of 3.0.0 comes up with the counter of logs types and preview in t
 In the version of 3.1.0 comes up with the screen messages.
 
 ![LuviConsole IMGUI Instance](images/image03.gif)
+
+## Requirements
+
+- Unity 6000.0 or newer.
+- **Input System** package (`com.unity.inputsystem`). It is installed automatically as a dependency of LuviConsole.
+- In **Project Settings > Player > Active Input Handling**, choose **Input System Package (New)** or **Both**.
 
 ## How to use?
 
@@ -28,6 +36,21 @@ void Awake()
 ```
 
 2. Put the prefab of **LuviConsole** into the most first scene. You can find it in package folder from this path: **Packages/LuviConsole/Resources/LuviKunG/LuviConsole.prefab**
+
+## Controls
+
+- Press **F1** to toggle the console, **F2** to toggle the preview and **F3** to toggle the screen messages.
+  - These are `InputAction` fields in the **LuviConsole** inspector, so you can rebind them to any control, including modifier combinations (such as **Ctrl + F1**) and gamepad buttons.
+- On touch screens, swipe right from the left half of the screen to open the console and swipe left to close it. Swipe left from the right half of the screen to open the preview and swipe right to close it.
+- In the command field, press **Up** and **Down** to browse executed commands and **Enter** to execute.
+- You can also toggle by code with `LuviConsole.Instance.IsShowingConsole`, `IsShowingPreview` and `IsShowingScreenMessage`.
+
+## Customize the style
+
+LuviConsole creates its own `UIDocument` and `PanelSettings` at runtime.
+
+- To change the look, copy **Resources/LuviKunG/LuviConsoleStyle.uss** and assign your copy to the **Style Sheet** field of **LuviConsole**.
+- To use your own panel settings (for example, a different scale mode), add a `UIDocument` with your `PanelSettings` to the **LuviConsole** GameObject.
 
 ## How to create command?
 

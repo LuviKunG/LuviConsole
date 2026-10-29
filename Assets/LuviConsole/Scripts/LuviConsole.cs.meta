@@ -4,7 +4,8 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - guiSkin: {instanceID: 0}
+  - styleSheet: {fileID: 7433441132597879392, guid: de9ba989d83dbcd49b0d60a07db1fbef,
+      type: 3}
   executionOrder: -1
   icon: {instanceID: 0}
   userData: 
