@@ -49,6 +49,7 @@ void Awake()
 
 LuviConsole creates its own `UIDocument` and `PanelSettings` at runtime.
 
+- To use the look of the IMGUI version (3.x and older), assign **Styles/LuviConsoleClassicStyle.uss** to the **Style Sheet** field of **LuviConsole**.
 - To change the look, copy **Resources/LuviKunG/LuviConsoleStyle.uss** and assign your copy to the **Style Sheet** field of **LuviConsole**.
 - To use your own panel settings (for example, a different scale mode), add a `UIDocument` with your `PanelSettings` to the **LuviConsole** GameObject.
 

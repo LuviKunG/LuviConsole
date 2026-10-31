@@ -15,7 +15,8 @@ You can get the older version by package manager in here.
   - Keep the layout switching between landscape (logs left, commands right) and portrait (logs top, commands bottom) when the screen aspect ratio changes.
   - Log entries are recycled when the log capacity is reached.
   - Drag the log panel to scroll with the mouse or touch.
-  - Remove `LuviConsoleGUI.guiskin` and the GUI textures. The `guiSkin` field is removed.
+  - Remove `LuviConsoleGUI.guiskin`. The `guiSkin` field is removed.
+  - Add `Styles/LuviConsoleClassicStyle.uss` that restores the look of the IMGUI version with the original textures. Assign it to the **Style Sheet** field to use it.
 - Replace the legacy Input Manager with the **Input System**.
   - `toggleConsoleKeys`, `togglePreviewKeys` and `toggleScreenMessageKeys` (`KeyCode[]`) are replaced by `toggleConsoleAction`, `togglePreviewAction` and `toggleScreenMessageAction` (`InputAction`). Defaults are still F1, F2 and F3, and they can be bound to any control, including modifier composites and gamepad buttons.
   - Toggle actions now work on every platform, not only in the editor.

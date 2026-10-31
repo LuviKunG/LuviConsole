@@ -21,6 +21,8 @@ namespace LuviKunG.Console
         private const string USS_CONSOLE_PORTRAIT = USS_CONSOLE + "--portrait";
         private const string USS_PANE = USS_ROOT + "__pane";
         private const string USS_PANEL = USS_ROOT + "__panel";
+        private const string USS_PANEL_LOG = USS_PANEL + "--log";
+        private const string USS_PANEL_COMMAND = USS_PANEL + "--command";
         private const string USS_PANEL_HEADER = USS_ROOT + "__panel-header";
         private const string USS_PANEL_TITLE = USS_ROOT + "__panel-title";
         private const string USS_LOG_SCROLL = USS_ROOT + "__log-scroll";
@@ -31,6 +33,7 @@ namespace LuviKunG.Console
         private const string USS_SPACER = USS_ROOT + "__spacer";
         private const string USS_BUTTON = USS_ROOT + "__button";
         private const string USS_BUTTON_ACCENT = USS_BUTTON + "--accent";
+        private const string USS_BUTTON_WIDE = USS_BUTTON + "--wide";
         private const string USS_COMMAND_FIELD = USS_ROOT + "__command-field";
         private const string USS_COMMAND_HELP = USS_ROOT + "__command-help";
         private const string USS_PRESET_SCROLL = USS_ROOT + "__preset-scroll";
@@ -136,6 +139,7 @@ namespace LuviKunG.Console
 
             VisualElement logPane = AddElement<VisualElement>(uiConsole, USS_PANE);
             VisualElement logPanel = AddElement<VisualElement>(logPane, USS_PANEL);
+            logPanel.AddToClassList(USS_PANEL_LOG);
             AddPanelHeader(logPanel, "LOGS");
             uiLogScroll = AddElement<ScrollView>(logPanel, USS_LOG_SCROLL);
             uiLogScroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
@@ -143,7 +147,7 @@ namespace LuviKunG.Console
             RegisterLogDragScroll(uiLogScroll.contentViewport);
             VisualElement logToolbar = AddElement<VisualElement>(logPane, USS_TOOLBAR);
             logToolbar.AddToClassList(USS_TOOLBAR_FOOTER);
-            AddButton(logToolbar, "Clear", ClearLogs);
+            AddButton(logToolbar, "Clear", ClearLogs).AddToClassList(USS_BUTTON_WIDE);
             AddElement<VisualElement>(logToolbar, USS_SPACER).pickingMode = PickingMode.Ignore;
             AddButton(logToolbar, "A+", () => SetLogFontSize(logFontSize + FONT_SIZE_STEP));
             AddButton(logToolbar, "A-", () => SetLogFontSize(logFontSize - FONT_SIZE_STEP));
@@ -153,11 +157,15 @@ namespace LuviKunG.Console
             inputRow.AddToClassList(USS_TOOLBAR_HEADER);
             uiCommandField = AddElement<TextField>(inputRow, USS_COMMAND_FIELD);
             uiCommandField.textEdition.placeholder = "Enter command...";
+            // Keep the caret at the end of a preset or history command instead of selecting all of it on focus.
+            uiCommandField.textSelection.selectAllOnFocus = false;
+            uiCommandField.textSelection.selectAllOnMouseUp = false;
             uiCommandField.RegisterCallback<KeyDownEvent>(OnCommandFieldKeyDown, TrickleDown.TrickleDown);
             uiCommandField.RegisterCallback<NavigationMoveEvent>(OnCommandFieldNavigationMove, TrickleDown.TrickleDown);
             uiSendButton = AddButton(inputRow, "Send", ExecuteCurrentCommand);
             uiSendButton.AddToClassList(USS_BUTTON_ACCENT);
             VisualElement commandPanel = AddElement<VisualElement>(commandPane, USS_PANEL);
+            commandPanel.AddToClassList(USS_PANEL_COMMAND);
             AddPanelHeader(commandPanel, "COMMANDS");
             uiCommandHelp = AddElement<Label>(commandPanel, USS_COMMAND_HELP);
             uiPresetScroll = AddElement<ScrollView>(commandPanel, USS_PRESET_SCROLL);
@@ -348,7 +356,8 @@ namespace LuviKunG.Console
         private void ScrollLogToBottom()
         {
             Scroller scroller = uiLogScroll.verticalScroller;
-            scroller.value = scroller.highValue;
+            // The high value is negative while the content is shorter than the viewport.
+            scroller.value = Mathf.Max(scroller.lowValue, scroller.highValue);
         }
 
         private void OnLogContentGeometryChanged(GeometryChangedEvent evt)
