@@ -1,0 +1,231 @@
+/* LuviConsole classic style sheet.
+ * Restores the look of the IMGUI LuviConsole (version 3.x and older) on top of the default layout.
+ * Assign this style sheet to LuviConsole's "Style Sheet" field to use it. */
+
+@import url("../Resources/LuviKunG/LuviConsoleStyle.uss");
+
+/* Layout: panels and bars are flush with each other, like the IMGUI rects. */
+
+.luvi-console__console {
+    padding: 0;
+}
+
+.luvi-console__pane {
+    margin: 0;
+}
+
+.luvi-console__panel {
+    padding: 24px 8px 8px 8px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("../GUI/backgrounddebug.png");
+    -unity-slice-left: 5;
+    -unity-slice-right: 50;
+    -unity-slice-top: 14;
+    -unity-slice-bottom: 5;
+}
+
+.luvi-console__panel--command {
+    padding: 8px;
+    background-image: url("../GUI/backgroundcommand.png");
+}
+
+.luvi-console__panel-header {
+    display: none;
+}
+
+.luvi-console .luvi-console__log-entry {
+    padding: 0;
+    border-bottom-width: 0;
+}
+
+.luvi-console__toolbar {
+    height: 64px;
+    margin: 0;
+}
+
+.luvi-console__toolbar--header,
+.luvi-console__toolbar--footer {
+    margin: 0;
+}
+
+/* Buttons */
+
+.luvi-console .luvi-console__button,
+.luvi-console .luvi-console__button--accent {
+    width: 64px;
+    min-width: 64px;
+    margin: 0;
+    padding: 8px 10px;
+    font-size: 20px;
+    -unity-font-style: normal;
+    color: rgb(255, 255, 255);
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("../GUI/button.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+}
+
+.luvi-console .luvi-console__button:hover,
+.luvi-console .luvi-console__button--accent:hover {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("../GUI/button_hover.png");
+}
+
+.luvi-console .luvi-console__button:active,
+.luvi-console .luvi-console__button--accent:active {
+    color: rgb(255, 255, 255);
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("../GUI/button_press.png");
+}
+
+.luvi-console .luvi-console__button--wide {
+    width: 128px;
+}
+
+/* Command input */
+
+.luvi-console .luvi-console__command-field {
+    margin: 0;
+}
+
+.luvi-console .luvi-console__command-field #unity-text-input {
+    padding: 4px 12px;
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("../GUI/button.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+}
+
+.luvi-console .luvi-console__command-field:hover #unity-text-input,
+.luvi-console .luvi-console__command-field:focus #unity-text-input {
+    color: rgb(255, 255, 255);
+    background-image: url("../GUI/button_hover.png");
+}
+
+.luvi-console .luvi-console__command-help {
+    height: 60px;
+    margin: 0 56px 4px 0;
+    padding: 10px;
+    font-size: 16px;
+    -unity-font-style: normal;
+    color: rgb(255, 255, 255);
+}
+
+/* Command presets */
+
+.luvi-console .luvi-console__preset-group,
+.luvi-console .luvi-console__preset-group--expanded {
+    width: auto;
+    margin: 10px 0 0 0;
+    padding: 10px;
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    border-width: 0;
+    -unity-slice-left: 5;
+    -unity-slice-right: 5;
+    -unity-slice-top: 5;
+    -unity-slice-bottom: 5;
+}
+
+.luvi-console .luvi-console__preset {
+    width: auto;
+    margin: 0;
+    padding: 10px;
+    font-size: 16px;
+}
+
+/* Scroll bars */
+
+.luvi-console .unity-scroller--vertical {
+    width: 32px;
+}
+
+.luvi-console .unity-scroller--vertical .unity-scroller__low-button,
+.luvi-console .unity-scroller--vertical .unity-scroller__high-button {
+    display: none;
+}
+
+.luvi-console .unity-scroller--vertical .unity-scroller__slider {
+    margin: 0;
+    padding: 0;
+    width: 32px;
+    flex-grow: 1;
+}
+
+.luvi-console .unity-scroller--vertical .unity-base-slider__tracker {
+    left: 0;
+    width: 32px;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    background-image: url("../GUI/button.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+}
+
+.luvi-console .unity-scroller--vertical .unity-base-slider__dragger {
+    left: 0;
+    width: 32px;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    background-image: url("../GUI/button_press.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+}
+
+/* Preview */
+
+.luvi-console__preview-layer {
+    padding: 0;
+}
+
+.luvi-console__preview {
+    justify-content: flex-start;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 0;
+    background-image: url("../GUI/button.png");
+    -unity-slice-left: 5;
+    -unity-slice-right: 5;
+    -unity-slice-top: 5;
+    -unity-slice-bottom: 5;
+}
+
+.luvi-console .luvi-console__preview-label {
+    font-size: 16px;
+}
+
+.luvi-console .luvi-console__preview-row--warning > .luvi-console__preview-label {
+    color: rgb(255, 255, 0);
+}
+
+.luvi-console .luvi-console__preview-row--error > .luvi-console__preview-label,
+.luvi-console .luvi-console__preview-row--exception > .luvi-console__preview-label {
+    color: rgb(255, 0, 0);
+}
+
+/* Screen messages */
+
+.luvi-console .luvi-console__screen-message {
+    padding: 0;
+    text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
