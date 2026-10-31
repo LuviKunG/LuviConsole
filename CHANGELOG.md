@@ -4,7 +4,7 @@ You can get the older version by package manager in here.
 
 ## Released
 
-### v4.0.0 October 29th 2026 - Latest
+### v4.0.0 October 31st 2026 - Latest
 
 `https://github.com/LuviKunG/LuviConsole.git#4.0.0`
 
