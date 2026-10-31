@@ -191,8 +191,11 @@ namespace LuviKunG.Console
         #region Inspector Fields
 
         [SerializeField]
-        [Tooltip("Optional style sheet that replaces the default LuviConsole style sheet.")]
+        [Tooltip("Style sheet of the console. Uses Styles/LuviConsoleStyle.uss by default, or Styles/LuviConsoleClassicStyle.uss for the classic look.")]
         private StyleSheet styleSheet;
+        [SerializeField]
+        [Tooltip("Theme style sheet of the panel settings that LuviConsole creates. Not used when the UIDocument already has panel settings.")]
+        private ThemeStyleSheet themeStyleSheet;
 
         [Min(0)]
         [Tooltip("The capacity of list that will show debug log on console window.")]

@@ -24,12 +24,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7235947759470259904}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8821493787961456767
 MonoBehaviour:
@@ -43,10 +44,78 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f19fa7680e35b974281e02967799f89a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  styleSheet: {fileID: 7433441132597879392, guid: de9ba989d83dbcd49b0d60a07db1fbef,
+    type: 3}
+  themeStyleSheet: {fileID: -4733365628477956816, guid: 3c561d7afc7b1ef4cadac8e190b31495,
+    type: 3}
   logCapacity: 64
-  excuteCapacity: 16
-  swipeRatio: 0.8
+  executeCapacity: 16
   defaultFontSize: 16
   autoShowWarning: 0
   autoShowError: 0
   autoShowException: 0
+  commandLog: 0
+  toggleConsoleAction:
+    m_Name: Toggle Console
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: a02eff7e-abad-4b21-9a48-7cec59c87474
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 6bfb06db-7c1f-4781-8696-ea5570aa4215
+      m_Path: <Keyboard>/f1
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Toggle Console
+      m_Flags: 0
+    m_Flags: 0
+    m_Priority: 0
+  togglePreviewAction:
+    m_Name: Toggle Preview
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: 1aa0a38a-6c35-43b6-94ce-0787fb35d486
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: ad5cd1c2-bb74-4774-985a-d1d8163c7bb0
+      m_Path: <Keyboard>/f2
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Toggle Preview
+      m_Flags: 0
+    m_Flags: 0
+    m_Priority: 0
+  toggleScreenMessageAction:
+    m_Name: Toggle Screen Message
+    m_Type: 1
+    m_ExpectedControlType: 
+    m_Id: 21a26aff-b2ba-44fd-9529-25c8b5074226
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: f0f06cff-515c-4363-840d-429803c2c15c
+      m_Path: <Keyboard>/f3
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Toggle Screen Message
+      m_Flags: 0
+    m_Flags: 0
+    m_Priority: 0
+  swipeToToggle: 1
+  swipeRatio: 0.8
+  previewAnchorPosition: 8
+  previewSize: {x: 128, y: 96}
+  showScreenMessageOnAwake: 1
+  extendUI:
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0

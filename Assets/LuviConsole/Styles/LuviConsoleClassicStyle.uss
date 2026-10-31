@@ -2,7 +2,7 @@
  * Restores the look of the IMGUI LuviConsole (version 3.x and older) on top of the default layout.
  * Assign this style sheet to LuviConsole's "Style Sheet" field to use it. */
 
-@import url("../Resources/LuviKunG/LuviConsoleStyle.uss");
+@import url("LuviConsoleStyle.uss");
 
 /* Layout: panels and bars are flush with each other, like the IMGUI rects. */
 

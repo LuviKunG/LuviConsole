@@ -11,7 +11,7 @@ You can get the older version by package manager in here.
 - **Breaking:** Requires Unity 6000.0 or newer and the **Input System** package (`com.unity.inputsystem`). Set **Active Input Handling** in Player Settings to **Input System Package (New)** or **Both**.
 - Rebuild the runtime UI with **UI Toolkit** instead of IMGUI.
   - `UIDocument` and `PanelSettings` are created automatically at runtime. If the GameObject already has a `UIDocument` with `PanelSettings` assigned, it will use that instead.
-  - New default style at `Resources/LuviKunG/LuviConsoleStyle.uss`. Assign your own style sheet to the new **Style Sheet** field to replace it.
+  - All style sheets are in the `Styles` folder. The default style is `Styles/LuviConsoleStyle.uss` and the theme is `Styles/LuviConsoleTheme.tss`, assigned to the new **Style Sheet** and **Theme Style Sheet** fields. Assign your own style sheet to the **Style Sheet** field to replace the default style.
   - Keep the layout switching between landscape (logs left, commands right) and portrait (logs top, commands bottom) when the screen aspect ratio changes.
   - Log entries are recycled when the log capacity is reached.
   - Drag the log panel to scroll with the mouse or touch.
