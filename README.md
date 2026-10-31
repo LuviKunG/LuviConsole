@@ -3,6 +3,12 @@ LuviConsole is a runtime console of Unity, built with **UI Toolkit** and the **I
 
 > Version 4.0.0 replaced IMGUI and the legacy Input Manager. If you still need the IMGUI version, install version `3.2.0`.
 
+![LuviConsole UI Toolkit Instance](images/luviconsole_v4.gif)
+
+In the version of 4.0.0, the console is rebuilt with UI Toolkit and the Input System. If you prefer the look of the IMGUI version, assign **Styles/LuviConsoleClassicStyle.uss** to the **Style Sheet** field.
+
+### IMGUI version (3.x and older)
+
 ![LuviConsole IMGUI Instance](images/image01.gif)
 
 In the version of 3.0.0 comes up with the counter of logs types and preview in the mini panel. You can adjust the size of the box too.

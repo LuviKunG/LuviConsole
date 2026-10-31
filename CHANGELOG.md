@@ -8,6 +8,8 @@ You can get the older version by package manager in here.
 
 `https://github.com/LuviKunG/LuviConsole.git#4.0.0`
 
+![LuviConsole UI Toolkit Instance](images/luviconsole_v4.gif)
+
 - **Breaking:** Requires Unity 6000.0 or newer and the **Input System** package (`com.unity.inputsystem`). Set **Active Input Handling** in Player Settings to **Input System Package (New)** or **Both**.
 - Rebuild the runtime UI with **UI Toolkit** instead of IMGUI.
   - `UIDocument` and `PanelSettings` are created automatically at runtime. If the GameObject already has a `UIDocument` with `PanelSettings` assigned, it will use that instead.
