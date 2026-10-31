@@ -1,5 +1,5 @@
 /* LuviConsole default style sheet.
- * Assign your own style sheet to LuviConsole's "Style Sheet" field to replace this one. */
+ * Assign your own style sheet to the "Style Sheet" field of LuviConsole to replace this one. */
 
 .luvi-console {
     position: absolute;
@@ -9,11 +9,11 @@
     bottom: 0;
     font-size: 16px;
     color: rgb(230, 233, 239);
-    -unity-font-definition: url("../../GUI/tahoma.ttf");
+    -unity-font-definition: url("../GUI/tahoma.ttf");
 }
 
 .luvi-console .unity-text-element {
-    -unity-font-definition: url("../../GUI/tahoma.ttf");
+    -unity-font-definition: url("../GUI/tahoma.ttf");
 }
 
 .luvi-console__safe-area {

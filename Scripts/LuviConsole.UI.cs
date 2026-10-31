@@ -8,8 +8,6 @@ namespace LuviKunG.Console
     {
         #region UI Constants
 
-        private const string DEFAULT_RESOURCE_PATH_STYLE = "LuviKunG/LuviConsoleStyle";
-        private const string DEFAULT_RESOURCE_PATH_THEME = "LuviKunG/LuviConsoleTheme";
         private const float PANEL_SORTING_ORDER = 30000.0f;
         private const int MIN_FONT_SIZE = 8;
         private const int MAX_FONT_SIZE = 64;
@@ -51,6 +49,12 @@ namespace LuviKunG.Console
         private const string USS_SCREEN_MESSAGES = USS_ROOT + "__screen-messages";
         private const string USS_SCREEN_MESSAGE = USS_ROOT + "__screen-message";
 
+#if UNITY_EDITOR
+        // GUIDs of Styles/LuviConsoleStyle.uss and Styles/LuviConsoleTheme.tss, which work wherever the package is installed.
+        private const string DEFAULT_STYLE_SHEET_GUID = "de9ba989d83dbcd49b0d60a07db1fbef";
+        private const string DEFAULT_THEME_STYLE_SHEET_GUID = "3c561d7afc7b1ef4cadac8e190b31495";
+#endif
+
         #endregion
 
         #region UI Fields
@@ -87,6 +91,18 @@ namespace LuviKunG.Console
 
         #region UI Setup
 
+#if UNITY_EDITOR
+        // Assign the default style sheets when the component is added in the editor.
+        private void Reset()
+        {
+            styleSheet = LoadAssetByGUID<StyleSheet>(DEFAULT_STYLE_SHEET_GUID);
+            themeStyleSheet = LoadAssetByGUID<ThemeStyleSheet>(DEFAULT_THEME_STYLE_SHEET_GUID);
+        }
+
+        private static T LoadAssetByGUID<T>(string guid) where T : UnityEngine.Object =>
+            UnityEditor.AssetDatabase.LoadAssetAtPath<T>(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+#endif
+
         private void SetupUI()
         {
             logFontSize = Mathf.Clamp(defaultFontSize, MIN_FONT_SIZE, MAX_FONT_SIZE);
@@ -107,11 +123,13 @@ namespace LuviKunG.Console
             RefreshPreviewCounts();
         }
 
-        private static PanelSettings CreateDefaultPanelSettings()
+        private PanelSettings CreateDefaultPanelSettings()
         {
+            if (themeStyleSheet == null)
+                Debug.LogWarning($"{nameof(LuviConsole)} has no theme style sheet assigned.", this);
             PanelSettings settings = ScriptableObject.CreateInstance<PanelSettings>();
             settings.name = $"{nameof(LuviConsole)} Panel Settings";
-            settings.themeStyleSheet = Resources.Load<ThemeStyleSheet>(DEFAULT_RESOURCE_PATH_THEME);
+            settings.themeStyleSheet = themeStyleSheet;
             settings.scaleMode = PanelScaleMode.ConstantPixelSize;
             settings.scale = 1.0f;
             settings.sortingOrder = PANEL_SORTING_ORDER;
@@ -122,11 +140,10 @@ namespace LuviKunG.Console
         {
             uiRoot = new VisualElement { name = USS_ROOT, pickingMode = PickingMode.Ignore };
             uiRoot.AddToClassList(USS_ROOT);
-            StyleSheet sheet = styleSheet != null ? styleSheet : Resources.Load<StyleSheet>(DEFAULT_RESOURCE_PATH_STYLE);
-            if (sheet != null)
-                uiRoot.styleSheets.Add(sheet);
+            if (styleSheet != null)
+                uiRoot.styleSheets.Add(styleSheet);
             else
-                Debug.LogWarning($"Cannot find {nameof(LuviConsole)} style sheet in resources path {DEFAULT_RESOURCE_PATH_STYLE}.");
+                Debug.LogWarning($"{nameof(LuviConsole)} has no style sheet assigned.", this);
 
             uiSafeArea = AddElement<VisualElement>(uiRoot, USS_SAFE_AREA);
             uiSafeArea.pickingMode = PickingMode.Ignore;

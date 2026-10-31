@@ -6,6 +6,8 @@ MonoImporter:
   defaultReferences:
   - styleSheet: {fileID: 7433441132597879392, guid: de9ba989d83dbcd49b0d60a07db1fbef,
       type: 3}
+  - themeStyleSheet: {fileID: -4733365628477956816, guid: 3c561d7afc7b1ef4cadac8e190b31495,
+      type: 3}
   executionOrder: -1
   icon: {instanceID: 0}
   userData: 

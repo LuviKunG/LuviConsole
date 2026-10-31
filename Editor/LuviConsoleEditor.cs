@@ -28,6 +28,7 @@ namespace LuviKunG.Console.Editor
             root.Add(version);
 
             root.Add(CreatePropertyField("styleSheet"));
+            root.Add(CreatePropertyField("themeStyleSheet"));
             root.Add(CreatePropertyField(nameof(console.logCapacity)));
             root.Add(CreatePropertyField(nameof(console.executeCapacity), "Log Executed Command Capacity"));
             root.Add(CreatePropertyField(nameof(console.defaultFontSize)));
